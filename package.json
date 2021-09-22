@@ -1,0 +1,61 @@
+{
+  "name": "react-ws-hook",
+  "version": "0.1.0",
+  "description": "A custom react hook to communicate over websockets",
+  "type": "module",
+  "exports": "./src/index.js",
+  "files": [
+    "src",
+    "*.md"
+  ],
+  "scripts": {
+    "test": "npm run lint && npm run unit",
+    "lint": "eslint src",
+    "unit": "jest",
+    "build": "node utils/clean.cjs lib && babel src --out-dir lib --ignore '**/__tests__' --copy-files --no-copy-ignored"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pearces/react-ws-hook.git"
+  },
+  "keywords": [
+    "react",
+    "npm",
+    "websocket",
+    "hook",
+    "node"
+  ],
+  "author": "Stephen Pearce (https://github.com/pearces)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pearces/react-ws-hook/issues"
+  },
+  "homepage": "https://github.com/pearces/react-ws-hook#readme",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.15.7",
+    "@babel/core": "^7.15.5",
+    "@babel/eslint-parser": "^7.15.7",
+    "@babel/preset-env": "^7.15.6",
+    "@babel/preset-react": "^7.14.5",
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-plugin-import": "^2.24.2",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-react": "^7.26.0",
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "react": "^17.0.2",
+    "ws": "^8.2.2"
+  },
+  "peerDependencies": {
+    "react": "^17.0.2",
+    "ws": "^8.2.2"
+  },
+  "dependencies": {
+    "babel-jest": "^27.2.1",
+    "eslint-plugin-jest": "^24.4.2",
+    "jest": "^27.2.1"
+  }
+}
