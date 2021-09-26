@@ -2,18 +2,12 @@
   "name": "react-ws-hook",
   "version": "0.1.0",
   "description": "A custom react hook to communicate over websockets",
-  "type": "module",
-  "exports": "./src/index.js",
+  "main": "./lib/cjs/index.js",
+  "module": "./lib/mjs/index.js",
   "files": [
-    "src",
+    "lib",
     "*.md"
   ],
-  "scripts": {
-    "test": "npm run lint && npm run unit",
-    "lint": "eslint src",
-    "unit": "jest",
-    "build": "node utils/clean.cjs lib && babel src --out-dir lib --ignore '**/__tests__' --copy-files --no-copy-ignored"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/pearces/react-ws-hook.git"
@@ -38,6 +32,7 @@
     "@babel/cli": "^7.15.7",
     "@babel/core": "^7.15.5",
     "@babel/eslint-parser": "^7.15.7",
+    "@babel/plugin-transform-runtime": "^7.15.0",
     "@babel/preset-env": "^7.15.6",
     "@babel/preset-react": "^7.14.5",
     "eslint": "^7.32.0",
@@ -50,12 +45,20 @@
     "ws": "^8.2.2"
   },
   "peerDependencies": {
-    "react": "^17.0.2",
-    "ws": "^8.2.2"
+    "react": "^17.0.2"
   },
   "dependencies": {
     "babel-jest": "^27.2.1",
     "eslint-plugin-jest": "^24.4.2",
     "jest": "^27.2.1"
+  },
+  "scripts": {
+    "test": "npm run lint && npm run unit",
+    "lint": "eslint src",
+    "unit": "jest",
+    "build:module": "BABEL_ENV=module babel src --out-dir lib/mjs --ignore '**/__tests__' --copy-files --no-copy-ignored",
+    "build:node": "BABEL_ENV=node babel src --out-dir lib/cjs --ignore '**/__tests__' --copy-files --no-copy-ignored",
+    "build": "npm run clean && npm run build:module && npm run build:node",
+    "clean": "node utils/clean.cjs lib"
   }
 }
