@@ -15,3 +15,8 @@ export const READY_STATES = [
 export const ERRORS = {
   WS_UNSUPPORTED: 'Global WebSocket object not supported or unavailable, not running useWebsocket hook'
 };
+
+export const DEFAULT_OPTIONS = {
+  reconnect: true,
+  reconnectWait: 2000
+};
