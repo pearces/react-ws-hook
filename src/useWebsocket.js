@@ -18,6 +18,7 @@ export default (url, hookOptions) => {
   const messageQueue = useRef([]).current;
   const options = useRef({ ...DEFAULT_OPTIONS, ...hookOptions }).current;
   const reconnectTimer = useRef(null);
+  const handlers = useRef(null);
 
   if (typeof WebSocket === 'undefined') {
     console.warn(WS_SUPPORTED);
@@ -37,23 +38,24 @@ export default (url, hookOptions) => {
     updateReadyState();
   };
 
-  const initializeWS = () => { /* eslint-disable no-use-before-define */
+  const onMessage = (message) => {
+    setReceived(message.data);
+    setMessageCount(messageCount + 1);
+  };
+
+  const createSocket = () => {
     if (ws.current && getReadyState() !== CLOSED) return;
 
     ws.current = new WebSocket(url);
-    ws.current.onopen = onOpen;
-    ws.current.onclose = onClose;
-    ws.current.onerror = handleError;
 
-    ws.current.onmessage = (message) => {
-      setReceived(message.data);
-      setMessageCount(messageCount + 1);
-    };
+    Object.keys(handlers.current).forEach(
+      (type) => ws.current.addEventListener(type, handlers.current[type])
+    );
   };
 
   const reconnect = () => {
     setReadyState(CONNECTING);
-    initializeWS();
+    createSocket();
     reconnectTimer.current = setTimeout(() => {
       if (getReadyState() === CLOSED) reconnect();
       else reconnectTimer.current = null;
@@ -71,7 +73,7 @@ export default (url, hookOptions) => {
     if (currentState === OPEN) ws.current.send(message);
     else {
       messageQueue.push(message);
-      if (currentState !== CONNECTING) initializeWS();
+      if (currentState !== CONNECTING) createSocket();
     }
   };
 
@@ -85,11 +87,24 @@ export default (url, hookOptions) => {
     }
   };
 
-  if (!ws.current) initializeWS();
+  if (!handlers.current) {
+    handlers.current = {
+      open: onOpen,
+      close: onClose,
+      error: handleError,
+      message: onMessage
+    };
+  }
+  if (!ws.current) createSocket();
 
   useEffect(() => () => {
     if (reconnectTimer.current !== null) clearTimeout(reconnectTimer.current);
     if (!ws.current) return;
+
+    Object.keys(handlers.current).forEach(
+      (type) => ws.current.removeEventListener(type, handlers[type])
+    );
+    handlers.current = null;
 
     ws.current.close();
     ws.current = null;
