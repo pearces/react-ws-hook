@@ -10,13 +10,21 @@ import {
 const { WS_SUPPORTED } = ERRORS;
 const { OPEN, CONNECTING, CLOSED } = CONNECTION_STATES;
 
-export default (url, hookOptions) => {
+export default (url, options) => {
   const ws = useRef(null);
   const [messageCount, setMessageCount] = useState(0);
   const [received, setReceived] = useState(null);
   const [readyState, setReadyState] = useState(CONNECTING);
   const messageQueue = useRef([]).current;
-  const options = useRef({ ...DEFAULT_OPTIONS, ...hookOptions }).current;
+  const {
+    reconnectWait,
+    reconnect: shouldReconnect,
+    onSend: sendHandler,
+    onMessage: messageHandler,
+    onOpen: openHandler,
+    onClose: closeHandler,
+    onError: errorHandler
+  } = useRef({ ...DEFAULT_OPTIONS, ...options }).current;
   const reconnectTimer = useRef(null);
   const handlers = useRef(null);
 
@@ -33,14 +41,17 @@ export default (url, hookOptions) => {
     return connectionState;
   };
 
-  const handleError = (error) => {
+  const onError = (error) => {
     console.error(error);
     updateReadyState();
+    if (errorHandler) errorHandler(error);
   };
 
-  const onMessage = (message) => {
-    setReceived(message.data);
+  const onMessage = (event) => {
+    const { data } = event;
+    setReceived(data);
     setMessageCount(messageCount + 1);
+    if (messageHandler) messageHandler(data, event);
   };
 
   const createSocket = () => {
@@ -59,26 +70,29 @@ export default (url, hookOptions) => {
     reconnectTimer.current = setTimeout(() => {
       if (getReadyState() === CLOSED) reconnect();
       else reconnectTimer.current = null;
-    }, options.reconnectWait);
+    }, reconnectWait);
   };
 
-  const onClose = () => {
-    const { reconnect: shouldReconnect } = options;
+  const onClose = (event) => {
     if (!shouldReconnect || readyState !== CONNECTING) updateReadyState();
     if (shouldReconnect) reconnect();
+    if (closeHandler) closeHandler(event);
   };
 
   const send = (message) => {
     const currentState = updateReadyState();
-    if (currentState === OPEN) ws.current.send(message);
-    else {
+    if (currentState === OPEN) {
+      ws.current.send(message);
+      if (sendHandler) sendHandler(message);
+    } else {
       messageQueue.push(message);
       if (currentState !== CONNECTING) createSocket();
     }
   };
 
-  const onOpen = () => {
+  const onOpen = (event) => {
     updateReadyState();
+    if (openHandler) openHandler(event);
     if (messageQueue.length) {
       while (messageQueue.length && getReadyState() === OPEN) {
         const message = messageQueue.shift();
@@ -91,7 +105,7 @@ export default (url, hookOptions) => {
     handlers.current = {
       open: onOpen,
       close: onClose,
-      error: handleError,
+      error: onError,
       message: onMessage
     };
   }
