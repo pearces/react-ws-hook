@@ -7,17 +7,17 @@ import {
   DEFAULT_OPTIONS
 } from './constants';
 
-const { WS_SUPPORTED } = ERRORS;
+const { WS_SUPPORTED, RECONNECT_LIMIT_EXCEEDED } = ERRORS;
 const { OPEN, CONNECTING, CLOSED } = CONNECTION_STATES;
 
 export default (url, options) => {
   const ws = useRef(null);
-  const [messageCount, setMessageCount] = useState(0);
   const [received, setReceived] = useState(null);
   const [readyState, setReadyState] = useState(CONNECTING);
   const messageQueue = useRef([]).current;
   const {
     reconnectWait,
+    reconnectAttempts,
     reconnect: shouldReconnect,
     onSend: sendHandler,
     onMessage: messageHandler,
@@ -27,10 +27,11 @@ export default (url, options) => {
   } = useRef({ ...DEFAULT_OPTIONS, ...options }).current;
   const reconnectTimer = useRef(null);
   const handlers = useRef(null);
+  const reconnects = useRef(reconnectAttempts);
 
   if (typeof WebSocket === 'undefined') {
     console.warn(WS_SUPPORTED);
-    return [() => {}, received, messageCount, { readyState }];
+    return [() => {}, received, { readyState }];
   }
 
   const getReadyState = () => READY_STATES[ws?.current?.readyState || 0];
@@ -50,7 +51,6 @@ export default (url, options) => {
   const onMessage = (event) => {
     const { data } = event;
     setReceived(data);
-    setMessageCount(messageCount + 1);
     if (messageHandler) messageHandler(data, event);
   };
 
@@ -67,6 +67,7 @@ export default (url, options) => {
   const reconnect = () => {
     setReadyState(CONNECTING);
     createSocket();
+    reconnects.current -= 1;
     reconnectTimer.current = setTimeout(() => {
       if (getReadyState() === CLOSED) reconnect();
       else reconnectTimer.current = null;
@@ -74,8 +75,11 @@ export default (url, options) => {
   };
 
   const onClose = (event) => {
-    if (!shouldReconnect || readyState !== CONNECTING) updateReadyState();
-    if (shouldReconnect) reconnect();
+    const { current: reconnectsLeft } = reconnects;
+    const willReconnect = shouldReconnect && reconnectsLeft !== 0;
+    if (reconnectsLeft === 0) console.warn(RECONNECT_LIMIT_EXCEEDED);
+    if (!willReconnect || readyState !== CONNECTING) updateReadyState();
+    if (willReconnect) reconnect();
     if (closeHandler) closeHandler(event);
   };
 
@@ -92,6 +96,7 @@ export default (url, options) => {
 
   const onOpen = (event) => {
     updateReadyState();
+    reconnects.current = reconnectAttempts;
     if (openHandler) openHandler(event);
     if (messageQueue.length) {
       while (messageQueue.length && getReadyState() === OPEN) {
@@ -125,5 +130,5 @@ export default (url, options) => {
   }, []);
 
   const { url: wsUrl } = ws.current;
-  return [send, received, messageCount, { readyState, url: wsUrl }];
+  return [send, received, { readyState, url: wsUrl }];
 };
