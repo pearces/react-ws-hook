@@ -7,7 +7,7 @@ import {
   DEFAULT_OPTIONS
 } from './constants';
 
-const { WS_SUPPORTED, RECONNECT_LIMIT_EXCEEDED } = ERRORS;
+const { WS_SUPPORTED, RECONNECT_LIMIT_EXCEEDED, SEND_ERROR } = ERRORS;
 const { OPEN, CONNECTING, CLOSED } = CONNECTION_STATES;
 
 export default (url, options) => {
@@ -19,6 +19,7 @@ export default (url, options) => {
     reconnectWait,
     reconnectAttempts,
     reconnect: shouldReconnect,
+    retrySend,
     onSend: sendHandler,
     onMessage: messageHandler,
     onOpen: openHandler,
@@ -89,7 +90,9 @@ export default (url, options) => {
       ws.current.send(message);
       if (sendHandler) sendHandler(message);
     } else {
-      messageQueue.push(message);
+      if (retrySend) messageQueue.push(message);
+      else console.warn(SEND_ERROR);
+
       if (currentState !== CONNECTING) createSocket();
     }
   };

@@ -14,11 +14,13 @@ export const READY_STATES = [
 
 export const ERRORS = {
   WS_UNSUPPORTED: 'Global WebSocket object not supported or unavailable, not running useWebsocket hook',
-  RECONNECT_LIMIT_EXCEEDED: 'Reconnect attempt limit exceeded'
+  RECONNECT_LIMIT_EXCEEDED: 'Reconnect attempt limit exceeded',
+  SEND_ERROR: 'Failed to send message'
 };
 
 export const DEFAULT_OPTIONS = {
   reconnect: true,
   reconnectWait: 2000,
-  reconnectAttempts: Infinity
+  reconnectAttempts: Infinity,
+  retrySend: true
 };
