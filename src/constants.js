@@ -22,5 +22,6 @@ export const DEFAULT_OPTIONS = {
   reconnect: true,
   reconnectWait: 2000,
   reconnectAttempts: Infinity,
-  retrySend: true
+  retrySend: true,
+  logger: console
 };

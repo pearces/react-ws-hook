@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { useRef, useState, useEffect } from 'react';
 import {
   READY_STATES,
@@ -24,14 +23,15 @@ export default (url, options) => {
     onMessage: messageHandler,
     onOpen: openHandler,
     onClose: closeHandler,
-    onError: errorHandler
+    onError: errorHandler,
+    logger
   } = useRef({ ...DEFAULT_OPTIONS, ...options }).current;
   const reconnectTimer = useRef(null);
   const handlers = useRef(null);
   const reconnects = useRef(reconnectAttempts);
 
   if (typeof WebSocket === 'undefined') {
-    console.warn(WS_SUPPORTED);
+    logger.warn(WS_SUPPORTED);
     return [() => {}, received, { readyState }];
   }
 
@@ -44,7 +44,7 @@ export default (url, options) => {
   };
 
   const onError = (error) => {
-    console.error(error);
+    logger.error(error);
     updateReadyState();
     if (errorHandler) errorHandler(error);
   };
@@ -78,7 +78,7 @@ export default (url, options) => {
   const onClose = (event) => {
     const { current: reconnectsLeft } = reconnects;
     const willReconnect = shouldReconnect && reconnectsLeft !== 0;
-    if (reconnectsLeft === 0) console.warn(RECONNECT_LIMIT_EXCEEDED);
+    if (reconnectsLeft === 0) logger.warn(RECONNECT_LIMIT_EXCEEDED);
     if (!willReconnect || readyState !== CONNECTING) updateReadyState();
     if (willReconnect) reconnect();
     if (closeHandler) closeHandler(event);
@@ -91,7 +91,7 @@ export default (url, options) => {
       if (sendHandler) sendHandler(message);
     } else {
       if (retrySend) messageQueue.push(message);
-      else console.warn(SEND_ERROR);
+      else logger.warn(SEND_ERROR);
 
       if (currentState !== CONNECTING) createSocket();
     }
