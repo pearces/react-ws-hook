@@ -3,17 +3,21 @@ import {
   READY_STATES,
   ERRORS,
   CONNECTION_STATES,
-  DEFAULT_OPTIONS
+  DEFAULT_OPTIONS,
+  ACTIONS
 } from './constants';
 
 const { WS_SUPPORTED, RECONNECT_LIMIT_EXCEEDED, SEND_ERROR } = ERRORS;
 const { OPEN, CONNECTING, CLOSED } = CONNECTION_STATES;
+const { CONNECTING: CONNECT, SENDING, DISCONNECTING } = ACTIONS;
 
 export default (url, options) => {
   const ws = useRef(null);
   const [received, setReceived] = useState(null);
   const [readyState, setReadyState] = useState(CONNECTING);
   const messageQueue = useRef([]).current;
+  let lastEvent = useRef(null).current;
+
   const {
     reconnectWait,
     reconnectAttempts,
@@ -44,9 +48,10 @@ export default (url, options) => {
   };
 
   const onError = (error) => {
-    logger.error(error);
+    logger.error(`Failed ${lastEvent || ' '}${error}`);
     updateReadyState();
     if (errorHandler) errorHandler(error);
+    lastEvent = null;
   };
 
   const onMessage = (event) => {
@@ -58,6 +63,7 @@ export default (url, options) => {
   const createSocket = () => {
     if (ws.current && getReadyState() !== CLOSED) return;
 
+    lastEvent = CONNECT;
     ws.current = new WebSocket(url);
 
     Object.keys(handlers.current).forEach(
@@ -87,6 +93,7 @@ export default (url, options) => {
   const send = (message) => {
     const currentState = updateReadyState();
     if (currentState === OPEN) {
+      lastEvent = SENDING;
       ws.current.send(message);
       if (sendHandler) sendHandler(message);
     } else {
@@ -128,7 +135,11 @@ export default (url, options) => {
     );
     handlers.current = null;
 
+    // TODO: check if this works when closing the socket and erroring out
+    lastEvent = DISCONNECTING; // eslint-disable-line react-hooks/exhaustive-deps
+    ws.onError = onError;
     ws.current.close();
+
     ws.current = null;
   }, []);
 

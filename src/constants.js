@@ -25,3 +25,9 @@ export const DEFAULT_OPTIONS = {
   retrySend: true,
   logger: console
 };
+
+export const ACTIONS = {
+  CONNECTING: 'connecting',
+  SENDING: 'sending',
+  DISCONNECTING: 'disconnecting'
+};
