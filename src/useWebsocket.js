@@ -48,7 +48,7 @@ export default (url, options) => {
   };
 
   const onError = (error) => {
-    logger.error(`Failed ${lastEvent || ' '}${error}`);
+    logger.error(`Failed ${lastEvent || ''} ${error.toString()}`);
     updateReadyState();
     if (errorHandler) errorHandler(error);
     lastEvent = null;
@@ -108,6 +108,7 @@ export default (url, options) => {
     updateReadyState();
     reconnects.current = reconnectAttempts;
     if (openHandler) openHandler(event);
+    lastEvent = null;
     if (messageQueue.length) {
       while (messageQueue.length && getReadyState() === OPEN) {
         const message = messageQueue.shift();
