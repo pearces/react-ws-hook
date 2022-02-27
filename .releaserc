@@ -5,14 +5,7 @@
     ["@semantic-release/npm", {
       "npmPublish": false
     }],
-    ["@semantic-release/github", {
-      "assets": [
-        "package.json",
-        "LICENSE",
-        "*.md",
-        "lib/**"
-      ]
-    }]
+    "@semantic-release/github"
   ],
   "preset": "angular"
 }
