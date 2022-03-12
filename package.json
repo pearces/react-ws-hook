@@ -1,6 +1,6 @@
 {
-  "name": "react-ws-hook",
-  "version": "0.1.0",
+  "name": "@pearces/react-ws-hook",
+  "version": "0.1.1",
   "description": "A custom react hook to communicate over websockets",
   "main": "./lib/cjs/index.js",
   "module": "./lib/mjs/index.js",
@@ -25,6 +25,9 @@
     "url": "https://github.com/pearces/react-ws-hook/issues"
   },
   "homepage": "https://github.com/pearces/react-ws-hook#readme",
+  "publishConfig": {
+    "registry":"https://npm.pkg.github.com"
+  },
   "engines": {
     "node": ">=14.0.0"
   },
