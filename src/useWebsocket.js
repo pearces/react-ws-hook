@@ -132,7 +132,7 @@ export default (url, options) => {
     if (!ws.current) return;
 
     Object.keys(handlers.current).forEach(
-      (type) => ws.current.removeEventListener(type, handlers[type])
+      (type) => ws.current.removeEventListener(type, handlers.current[type])
     );
     handlers.current = null;
 
