@@ -4,7 +4,7 @@ import { WebSocketServer } from 'ws';
 import useWebsocket from '..';
 import { CONNECTION_STATES } from '../constants';
 
-const { CONNECTING } = CONNECTION_STATES;
+const { CONNECTING, OPEN } = CONNECTION_STATES;
 
 const portResolver = () => new Promise((resolve, reject) => {
   const server = net.createServer();
@@ -34,13 +34,20 @@ let error;
 const onError = jest.fn((err) => { error = err; });
 const onConnect = jest.fn();
 const onOpen = jest.fn();
+const onClose = jest.fn();
 
 const startServer = () => {
   wss = new WebSocketServer({ port });
   wss.on('connection', onConnect);
 };
 
-const defaultOptions = { onError, logger, onOpen };
+const defaultOptions = {
+  onError,
+  logger,
+  onOpen,
+  onClose,
+  reconnectWait: 100
+};
 
 afterEach(() => {
   error = undefined;
@@ -48,6 +55,7 @@ afterEach(() => {
   onError.mockReset();
   onConnect.mockReset();
   onOpen.mockReset();
+  onClose.mockReset();
 
   logger.error.mockReset();
   logger.warn.mockReset();
@@ -74,10 +82,7 @@ describe('invocation', () => {
   it('connects with basic options', async () => {
     startServer();
 
-    const { waitForNextUpdate } = renderHook(
-      () => useWebsocket(testUrl, defaultOptions)
-    );
-
+    const { waitForNextUpdate } = renderHook(() => useWebsocket(testUrl, defaultOptions));
     await waitForNextUpdate();
 
     expect(error).toBeUndefined();
@@ -86,5 +91,25 @@ describe('invocation', () => {
 
     expect(onConnect).toHaveBeenCalled();
     expect(onOpen).toHaveBeenCalled();
+  });
+});
+
+describe('connections', () => {
+  it('reconnects when disconnected', async () => {
+    startServer();
+
+    const { result, waitFor, waitForNextUpdate } = renderHook(
+      () => useWebsocket(testUrl, defaultOptions)
+    );
+    await waitForNextUpdate();
+    const [,, { readyState }] = result.current;
+
+    [...wss.clients][0].close();
+
+    await waitForNextUpdate();
+
+    await waitFor(() => expect(onOpen).toHaveBeenCalledTimes(2));
+    expect(readyState).toEqual(OPEN);
+    expect(onConnect).toHaveBeenCalledTimes(2);
   });
 });
