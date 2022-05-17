@@ -2,9 +2,10 @@ import { renderHook } from '@testing-library/react-hooks';
 import net from 'net';
 import { WebSocketServer } from 'ws';
 import useWebsocket from '..';
-import { CONNECTION_STATES } from '../constants';
+import { CONNECTION_STATES, ERRORS } from '../constants';
 
 const { CONNECTING, OPEN } = CONNECTION_STATES;
+const { RECONNECT_LIMIT_EXCEEDED } = ERRORS;
 
 const portResolver = () => new Promise((resolve, reject) => {
   const server = net.createServer();
@@ -40,6 +41,8 @@ const startServer = () => {
   wss = new WebSocketServer({ port });
   wss.on('connection', onConnect);
 };
+
+const closeConnections = () => wss.clients.forEach((ws) => ws.close());
 
 const defaultOptions = {
   onError,
@@ -104,12 +107,33 @@ describe('connections', () => {
     await waitForNextUpdate();
     const [,, { readyState }] = result.current;
 
-    [...wss.clients][0].close();
-
+    closeConnections();
     await waitForNextUpdate();
 
     await waitFor(() => expect(onOpen).toHaveBeenCalledTimes(2));
     expect(readyState).toEqual(OPEN);
     expect(onConnect).toHaveBeenCalledTimes(2);
+  });
+
+  it('reconnect attempts are delayed according to reconnectWait', async () => {
+    const reconnectWait = 250;
+    startServer();
+
+    const onReconnect = jest.fn();
+    const { waitFor, waitForNextUpdate } = renderHook(
+      () => useWebsocket(testUrl, {
+        ...defaultOptions, reconnectAttempts: 2, reconnectWait, onReconnect
+      })
+    );
+    await waitForNextUpdate();
+
+    wss.close();
+    closeConnections();
+
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+    const disconnected = Date.now();
+
+    await waitFor(() => expect(logger.warn).toHaveBeenCalledWith(RECONNECT_LIMIT_EXCEEDED));
+    expect(Date.now() - disconnected).toBeGreaterThanOrEqual(reconnectWait);
   });
 });

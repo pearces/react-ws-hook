@@ -17,6 +17,7 @@ export default (url, options) => {
   const [readyState, setReadyState] = useState(CONNECTING);
   const messageQueue = useRef([]).current;
   let lastEvent = useRef(null).current;
+  let isReconnecting = useRef(false).current;
 
   const {
     reconnectWait,
@@ -73,11 +74,13 @@ export default (url, options) => {
 
   const reconnect = () => {
     setReadyState(CONNECTING);
-    createSocket();
-    reconnects.current -= 1;
+    isReconnecting = true;
     reconnectTimer.current = setTimeout(() => {
-      if (getReadyState() === CLOSED) reconnect();
-      else reconnectTimer.current = null;
+      if (getReadyState() === CLOSED) {
+        createSocket();
+        reconnects.current -= 1;
+        reconnect();
+      } else reconnectTimer.current = null;
     }, reconnectWait);
   };
 
@@ -86,7 +89,7 @@ export default (url, options) => {
     const willReconnect = shouldReconnect && reconnectsLeft !== 0;
     if (reconnectsLeft === 0) logger.warn(RECONNECT_LIMIT_EXCEEDED);
     if (!willReconnect || readyState !== CONNECTING) updateReadyState();
-    if (willReconnect) reconnect();
+    if (willReconnect && !isReconnecting) reconnect();
     if (closeHandler) closeHandler(event);
   };
 
@@ -107,6 +110,7 @@ export default (url, options) => {
   const onOpen = (event) => {
     updateReadyState();
     reconnects.current = reconnectAttempts;
+    isReconnecting = false;
     if (openHandler) openHandler(event);
     lastEvent = null;
     if (messageQueue.length) {
