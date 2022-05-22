@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react-hooks';
 import net from 'net';
 import { WebSocketServer } from 'ws';
 import useWebsocket from '..';
@@ -30,19 +30,28 @@ const logger = {
 };
 
 let wss;
+let ws;
 let error;
 
+// client events
 const onError = jest.fn((err) => { error = err; });
-const onConnect = jest.fn();
 const onOpen = jest.fn();
 const onClose = jest.fn();
 
+// server events
+const onServerMessage = jest.fn();
+const onServerConnect = jest.fn();
+
 const startServer = () => {
   wss = new WebSocketServer({ port });
-  wss.on('connection', onConnect);
+  wss.on('connection', (socket) => {
+    ws = socket;
+    ws.on('message', (msg) => onServerMessage(msg));
+    onServerConnect(ws);
+  });
 };
 
-const closeConnections = () => wss.clients.forEach((ws) => ws.close());
+const closeConnections = () => wss.clients.forEach((socket) => socket.close());
 
 const defaultOptions = {
   onError,
@@ -56,9 +65,11 @@ afterEach(() => {
   error = undefined;
 
   onError.mockReset();
-  onConnect.mockReset();
   onOpen.mockReset();
   onClose.mockReset();
+
+  onServerConnect.mockReset();
+  onServerMessage.mockReset();
 
   logger.error.mockReset();
   logger.warn.mockReset();
@@ -92,7 +103,7 @@ describe('invocation', () => {
     expect(logger.error).not.toHaveBeenCalled();
     expect(onError).not.toHaveBeenCalled();
 
-    expect(onConnect).toHaveBeenCalled();
+    expect(onServerConnect).toHaveBeenCalled();
     expect(onOpen).toHaveBeenCalled();
   });
 });
@@ -112,7 +123,7 @@ describe('connections', () => {
 
     await waitFor(() => expect(onOpen).toHaveBeenCalledTimes(2));
     expect(readyState).toEqual(OPEN);
-    expect(onConnect).toHaveBeenCalledTimes(2);
+    expect(onServerConnect).toHaveBeenCalledTimes(2);
   });
 
   it('reconnect attempts are delayed according to reconnectWait', async () => {
@@ -135,5 +146,26 @@ describe('connections', () => {
 
     await waitFor(() => expect(logger.warn).toHaveBeenCalledWith(RECONNECT_LIMIT_EXCEEDED));
     expect(Date.now() - disconnected).toBeGreaterThanOrEqual(reconnectWait);
+  });
+});
+
+describe('sending', () => {
+  it('receives a message sent through the hook', async () => {
+    startServer();
+
+    const onSend = jest.fn();
+    const { result, waitFor, waitForNextUpdate } = renderHook(
+      () => useWebsocket(testUrl, { ...defaultOptions, onSend })
+    );
+    await waitForNextUpdate();
+    const [send] = result.current;
+
+    const message = 'a string message';
+    act(() => {
+      send(message);
+    });
+
+    await waitFor(() => expect(onSend).toHaveBeenCalledWith(message));
+    await waitFor(() => expect(onServerMessage).toHaveBeenCalledWith(Buffer.from(message)));
   });
 });
