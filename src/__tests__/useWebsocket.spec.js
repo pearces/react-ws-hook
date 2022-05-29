@@ -38,6 +38,7 @@ const onError = jest.fn((err) => { error = err; });
 const onOpen = jest.fn();
 const onClose = jest.fn();
 const onMessage = jest.fn();
+const onSend = jest.fn();
 
 // server events
 const onServerMessage = jest.fn();
@@ -60,6 +61,7 @@ const defaultOptions = {
   onOpen,
   onClose,
   onMessage,
+  onSend,
   reconnectWait: 100
 };
 
@@ -70,6 +72,7 @@ afterEach(() => {
   onOpen.mockReset();
   onClose.mockReset();
   onMessage.mockReset();
+  onSend.mockReset();
 
   onServerConnect.mockReset();
   onServerMessage.mockReset();
@@ -156,9 +159,8 @@ describe('sending', () => {
   it('receives a text message sent through the hook on the server', async () => {
     startServer();
 
-    const onSend = jest.fn();
     const { result, waitFor, waitForNextUpdate } = renderHook(
-      () => useWebsocket(testUrl, { ...defaultOptions, onSend })
+      () => useWebsocket(testUrl, defaultOptions)
     );
     await waitForNextUpdate();
     const [send] = result.current;
@@ -170,6 +172,26 @@ describe('sending', () => {
 
     await waitFor(() => expect(onSend).toHaveBeenCalledWith(message));
     await waitFor(() => expect(onServerMessage).toHaveBeenCalledWith(Buffer.from(message)));
+  });
+
+  it('receives queued messages sent through the hook on the server after connecting', async () => {
+    const { result, waitFor, waitForNextUpdate } = renderHook(
+      () => useWebsocket(testUrl, defaultOptions)
+    );
+    await waitForNextUpdate();
+    const [send] = result.current;
+
+    const messages = ['first', 'second', 'third'];
+    act(() => {
+      messages.forEach((message) => send(message));
+      startServer();
+    });
+
+    await waitFor(() => expect(onSend).toHaveBeenCalledTimes(3));
+    await waitFor(() => expect(onServerMessage).toHaveBeenCalledTimes(3));
+    messages.forEach(
+      (message) => expect(onServerMessage).toHaveBeenCalledWith(Buffer.from(message))
+    );
   });
 });
 
