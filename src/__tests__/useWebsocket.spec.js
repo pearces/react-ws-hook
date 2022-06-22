@@ -5,7 +5,7 @@ import useWebsocket from '..';
 import { CONNECTION_STATES, ERRORS } from '../constants';
 
 const { CONNECTING, OPEN } = CONNECTION_STATES;
-const { RECONNECT_LIMIT_EXCEEDED } = ERRORS;
+const { RECONNECT_LIMIT_EXCEEDED, WS_SUPPORTED } = ERRORS;
 
 const portResolver = () => new Promise((resolve, reject) => {
   const server = net.createServer();
@@ -84,6 +84,14 @@ afterEach(() => {
 });
 
 describe('invocation', () => {
+  it('fails when websockets are unavailable', () => {
+    const { WebSocket } = global;
+    delete global.WebSocket;
+    renderHook(() => useWebsocket(testUrl, defaultOptions));
+    expect(logger.warn).toHaveBeenCalledWith(WS_SUPPORTED);
+    global.WebSocket = WebSocket;
+  });
+
   it('fails when unable to connect with basic options', async () => {
     const { result, waitForNextUpdate } = renderHook(
       () => useWebsocket(testUrl, defaultOptions)
