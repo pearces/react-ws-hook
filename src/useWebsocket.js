@@ -142,7 +142,7 @@ export default (url, options) => {
 
     // TODO: check if this works when closing the socket and erroring out
     lastEvent = DISCONNECTING; // eslint-disable-line react-hooks/exhaustive-deps
-    ws.onError = onError;
+    ws.current.onError = onError;
     ws.current.close();
 
     ws.current = null;
