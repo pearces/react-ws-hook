@@ -1,6 +1,6 @@
 {
   "name": "@pearces/react-ws-hook",
-  "version": "0.1.1",
+  "version": "0.1.8",
   "description": "A custom react hook to communicate over websockets",
   "main": "./lib/cjs/index.js",
   "module": "./lib/mjs/index.js",
@@ -58,7 +58,6 @@
     "@babel/runtime": "^7.15.4",
     "react": "^17.0.2"
   },
-  "dependencies": {},
   "scripts": {
     "test": "npm run lint && npm run unit",
     "lint": "eslint src",
