@@ -1,6 +1,6 @@
 {
   "name": "@pearces/react-ws-hook",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "description": "A custom react hook to communicate over websockets",
   "main": "./lib/cjs/index.js",
   "module": "./lib/mjs/index.js",
@@ -29,7 +29,7 @@
     "registry": "https://npm.pkg.github.com"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=14.17.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.20.7",
