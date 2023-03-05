@@ -54,7 +54,6 @@
     "ws": "^8.11.0"
   },
   "peerDependencies": {
-    "@babel/runtime": "^7.15.4",
     "react": "^17.0.2"
   },
   "scripts": {
