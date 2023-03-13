@@ -1,6 +1,6 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import net from 'net';
-import { WebSocketServer } from 'ws';
+import { WebSocketServer, WebSocket } from 'ws';
 import useWebsocket from '..';
 import { CONNECTION_STATES, ERRORS } from '../constants';
 
@@ -85,7 +85,6 @@ afterEach(() => {
 
 describe('invocation', () => {
   it('fails when websockets are unavailable', () => {
-    const { WebSocket } = global;
     delete global.WebSocket;
     renderHook(() => useWebsocket(testUrl, defaultOptions));
     expect(logger.warn).toHaveBeenCalledWith(WS_SUPPORTED);

@@ -12,5 +12,5 @@ module.exports = {
     '__mocks__',
     'coverage'
   ],
-  testEnvironment: 'jsdom'
+  testEnvironment: 'node'
 };
