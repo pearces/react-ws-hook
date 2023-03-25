@@ -1,11 +1,11 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import net from 'net';
-import { WebSocketServer, WebSocket } from 'ws';
 import useWebsocket from '..';
 import { CONNECTION_STATES, ERRORS } from '../constants';
 
 const { CONNECTING, OPEN } = CONNECTION_STATES;
 const { RECONNECT_LIMIT_EXCEEDED, WS_SUPPORTED } = ERRORS;
+const { WebSocketServer, WebSocket } = global;
 
 const portResolver = () => new Promise((resolve, reject) => {
   const server = net.createServer();

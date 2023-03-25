@@ -1,3 +1,5 @@
+const { WebSocketServer } = require('ws'); // eslint-disable-line import/no-extraneous-dependencies
+
 module.exports = {
   rootDir: './src',
   testMatch: [
@@ -12,5 +14,8 @@ module.exports = {
     '__mocks__',
     'coverage'
   ],
-  testEnvironment: 'node'
+  testEnvironment: 'jsdom',
+  globals: {
+    WebSocketServer // pass this from a commonjs import to avoid browser detection with jsdom
+  }
 };
