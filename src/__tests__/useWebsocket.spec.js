@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import net from 'net';
 import useWebsocket from '..';
 import { CONNECTION_STATES, ERRORS } from '../constants';
@@ -92,32 +92,28 @@ describe('invocation', () => {
   });
 
   it('fails when unable to connect with basic options', async () => {
-    const { result, waitForNextUpdate } = renderHook(
-      () => useWebsocket(testUrl, defaultOptions)
-    );
+    const { result } = renderHook(() => useWebsocket(testUrl, defaultOptions));
 
     const [,, { readyState, url }] = result.current;
     expect(readyState).toEqual(CONNECTING);
     expect(url).toEqual(testUrl);
     expect(error).toBeUndefined();
 
-    await waitForNextUpdate();
+    await waitFor(() => expect(onError).toHaveBeenCalled());
     expect(logger.error).toHaveBeenCalled();
-    expect(onError).toHaveBeenCalled();
   });
 
   it('connects with basic options', async () => {
     startServer();
 
-    const { waitForNextUpdate } = renderHook(() => useWebsocket(testUrl, defaultOptions));
-    await waitForNextUpdate();
+    renderHook(() => useWebsocket(testUrl, defaultOptions));
+    await waitFor(() => expect(onOpen).toHaveBeenCalled());
 
     expect(error).toBeUndefined();
     expect(logger.error).not.toHaveBeenCalled();
     expect(onError).not.toHaveBeenCalled();
 
     expect(onServerConnect).toHaveBeenCalled();
-    expect(onOpen).toHaveBeenCalled();
   });
 });
 
@@ -125,14 +121,12 @@ describe('connections', () => {
   it('reconnects when disconnected', async () => {
     startServer();
 
-    const { result, waitFor, waitForNextUpdate } = renderHook(
-      () => useWebsocket(testUrl, defaultOptions)
-    );
-    await waitForNextUpdate();
+    const { result } = renderHook(() => useWebsocket(testUrl, defaultOptions));
+
+    await waitFor(() => expect(onOpen).toHaveBeenCalled());
     const [,, { readyState }] = result.current;
 
     closeConnections();
-    await waitForNextUpdate();
 
     await waitFor(() => expect(onOpen).toHaveBeenCalledTimes(2));
     expect(readyState).toEqual(OPEN);
@@ -144,12 +138,12 @@ describe('connections', () => {
     startServer();
 
     const onReconnect = jest.fn();
-    const { waitFor, waitForNextUpdate } = renderHook(
+    renderHook(
       () => useWebsocket(testUrl, {
         ...defaultOptions, reconnectAttempts: 2, reconnectWait, onReconnect
       })
     );
-    await waitForNextUpdate();
+    await waitFor(() => expect(onOpen).toHaveBeenCalled());
 
     wss.close();
     closeConnections();
@@ -166,10 +160,7 @@ describe('sending', () => {
   it('receives a text message sent through the hook on the server', async () => {
     startServer();
 
-    const { result, waitFor, waitForNextUpdate } = renderHook(
-      () => useWebsocket(testUrl, defaultOptions)
-    );
-    await waitForNextUpdate();
+    const { result } = renderHook(() => useWebsocket(testUrl, defaultOptions));
     const [send] = result.current;
 
     const message = 'a string message';
@@ -182,10 +173,7 @@ describe('sending', () => {
   });
 
   it('receives queued messages sent through the hook on the server after connecting', async () => {
-    const { result, waitFor, waitForNextUpdate } = renderHook(
-      () => useWebsocket(testUrl, defaultOptions)
-    );
-    await waitForNextUpdate();
+    const { result } = renderHook(() => useWebsocket(testUrl, defaultOptions));
     const [send] = result.current;
 
     const messages = ['first', 'second', 'third'];
@@ -206,10 +194,8 @@ describe('receiving', () => {
   it('receives a message sent through the server on the client through the hook', async () => {
     startServer();
 
-    const { result, waitFor, waitForNextUpdate } = renderHook(
-      () => useWebsocket(testUrl, defaultOptions)
-    );
-    await waitForNextUpdate();
+    const { result } = renderHook(() => useWebsocket(testUrl, defaultOptions));
+    await waitFor(() => expect(onOpen).toHaveBeenCalled());
 
     const message = 'a string message';
     act(() => {
