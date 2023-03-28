@@ -27,6 +27,8 @@ jobs:
         run: npm ci
       - name: Run build
         run: npm run build
+      - name: Install semantic-release plugins
+        run: npm install --no-save @semantic-release/git @semantic-release/changelog
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
