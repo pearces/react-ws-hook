@@ -149,5 +149,10 @@ export default (url, options) => {
   }, []);
 
   const { url: wsUrl } = ws.current;
-  return [send, received, { readyState, url: wsUrl }];
+  return {
+    send,
+    received,
+    readyState,
+    url: wsUrl
+  };
 };

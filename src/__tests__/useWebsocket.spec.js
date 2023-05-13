@@ -94,7 +94,7 @@ describe('invocation', () => {
   it('fails when unable to connect with basic options', async () => {
     const { result } = renderHook(() => useWebsocket(testUrl, defaultOptions));
 
-    const [,, { readyState, url }] = result.current;
+    const { readyState, url } = result.current;
     expect(readyState).toEqual(CONNECTING);
     expect(url).toEqual(testUrl);
     expect(error).toBeUndefined();
@@ -124,7 +124,7 @@ describe('connections', () => {
     const { result } = renderHook(() => useWebsocket(testUrl, defaultOptions));
 
     await waitFor(() => expect(onOpen).toHaveBeenCalled());
-    const [,, { readyState }] = result.current;
+    const { readyState } = result.current;
 
     closeConnections();
 
@@ -161,7 +161,7 @@ describe('sending', () => {
     startServer();
 
     const { result } = renderHook(() => useWebsocket(testUrl, defaultOptions));
-    const [send] = result.current;
+    const { send } = result.current;
 
     const message = 'a string message';
     act(() => {
@@ -174,7 +174,7 @@ describe('sending', () => {
 
   it('receives queued messages sent through the hook on the server after connecting', async () => {
     const { result } = renderHook(() => useWebsocket(testUrl, defaultOptions));
-    const [send] = result.current;
+    const { send } = result.current;
 
     const messages = ['first', 'second', 'third'];
     act(() => {
@@ -203,7 +203,7 @@ describe('receiving', () => {
     });
 
     await waitFor(() => expect(onMessage).toHaveBeenCalledWith(message, expect.any(Object)));
-    const [, received] = result.current;
+    const { received } = result.current;
     expect(received).toEqual(message);
   });
 });
