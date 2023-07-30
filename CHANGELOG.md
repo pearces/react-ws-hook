@@ -1,3 +1,10 @@
+## [0.2.1](https://github.com/pearces/react-ws-hook/compare/v0.2.0...v0.2.1) (2023-07-30)
+
+
+### Bug Fixes
+
+* **lint:** change import error to resolve linter error ([e8745f7](https://github.com/pearces/react-ws-hook/commit/e8745f7cc4f630ee09c67787632ce7f1006c9b96))
+
 # [0.2.0](https://github.com/pearces/react-ws-hook/compare/v0.1.11...v0.2.0) (2023-05-13)
 
 
