@@ -1,5 +1,5 @@
-import { renderHook, act, waitFor } from '@testing-library/react';
 import net from 'net';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import useWebsocket from '..';
 import { CONNECTION_STATES, ERRORS } from '../constants';
 
