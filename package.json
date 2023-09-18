@@ -36,7 +36,7 @@
     "@babel/core": "^7.22.17",
     "@babel/eslint-parser": "^7.22.15",
     "@babel/plugin-transform-runtime": "^7.22.15",
-    "@babel/preset-env": "^7.22.15",
+    "@babel/preset-env": "^7.22.20",
     "@babel/preset-react": "^7.22.15",
     "@testing-library/react": "^14.0.0",
     "babel-jest": "^29.7.0",
