@@ -1,11 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import {
-  READY_STATES,
-  ERRORS,
-  CONNECTION_STATES,
-  DEFAULT_OPTIONS,
-  ACTIONS
-} from './constants';
+import { READY_STATES, ERRORS, CONNECTION_STATES, DEFAULT_OPTIONS, ACTIONS } from './constants';
 
 const { WS_SUPPORTED, RECONNECT_LIMIT_EXCEEDED, SEND_ERROR } = ERRORS;
 const { OPEN, CONNECTING, CLOSED } = CONNECTION_STATES;
@@ -67,8 +61,8 @@ export default (url, options) => {
     lastEvent = CONNECT;
     ws.current = new WebSocket(url);
 
-    Object.keys(handlers.current).forEach(
-      (type) => ws.current.addEventListener(type, handlers.current[type])
+    Object.keys(handlers.current).forEach((type) =>
+      ws.current.addEventListener(type, handlers.current[type])
     );
   };
 
@@ -131,22 +125,25 @@ export default (url, options) => {
   }
   if (!ws.current) createSocket();
 
-  useEffect(() => () => {
-    if (reconnectTimer.current !== null) clearTimeout(reconnectTimer.current);
-    if (!ws.current) return;
+  useEffect(
+    () => () => {
+      if (reconnectTimer.current !== null) clearTimeout(reconnectTimer.current);
+      if (!ws.current) return;
 
-    Object.keys(handlers.current).forEach(
-      (type) => ws.current.removeEventListener(type, handlers.current[type])
-    );
-    handlers.current = null;
+      Object.keys(handlers.current).forEach((type) =>
+        ws.current.removeEventListener(type, handlers.current[type])
+      );
+      handlers.current = null;
 
-    // TODO: check if this works when closing the socket and erroring out
-    lastEvent = DISCONNECTING; // eslint-disable-line react-hooks/exhaustive-deps
-    ws.current.onError = onError;
-    ws.current.close();
+      // TODO: check if this works when closing the socket and erroring out
+      lastEvent = DISCONNECTING; // eslint-disable-line react-hooks/exhaustive-deps
+      ws.current.onError = onError;
+      ws.current.close();
 
-    ws.current = null;
-  }, []);
+      ws.current = null;
+    },
+    []
+  );
 
   const { url: wsUrl } = ws.current;
   return {

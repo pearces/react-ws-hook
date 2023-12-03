@@ -13,7 +13,8 @@ export const READY_STATES = [
 ];
 
 export const ERRORS = {
-  WS_UNSUPPORTED: 'Global WebSocket object not supported or unavailable, not running useWebsocket hook',
+  WS_UNSUPPORTED:
+    'Global WebSocket object not supported or unavailable, not running useWebsocket hook',
   RECONNECT_LIMIT_EXCEEDED: 'Reconnect attempt limit exceeded',
   SEND_ERROR: 'Failed to send message'
 };

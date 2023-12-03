@@ -7,14 +7,15 @@ const { CONNECTING, OPEN } = CONNECTION_STATES;
 const { RECONNECT_LIMIT_EXCEEDED, WS_SUPPORTED } = ERRORS;
 const { WebSocketServer, WebSocket } = global;
 
-const portResolver = () => new Promise((resolve, reject) => {
-  const server = net.createServer();
-  server.on('error', reject);
-  server.listen(0, () => {
-    const { port } = server.address();
-    server.close(() => resolve(port));
+const portResolver = () =>
+  new Promise((resolve, reject) => {
+    const server = net.createServer();
+    server.on('error', reject);
+    server.listen(0, () => {
+      const { port } = server.address();
+      server.close(() => resolve(port));
+    });
   });
-});
 
 let port;
 let testUrl;
@@ -34,7 +35,9 @@ let ws;
 let error;
 
 // client events
-const onError = jest.fn((err) => { error = err; });
+const onError = jest.fn((err) => {
+  error = err;
+});
 const onOpen = jest.fn();
 const onClose = jest.fn();
 const onMessage = jest.fn();
@@ -138,9 +141,12 @@ describe('connections', () => {
     startServer();
 
     const onReconnect = jest.fn();
-    renderHook(
-      () => useWebsocket(testUrl, {
-        ...defaultOptions, reconnectAttempts: 2, reconnectWait, onReconnect
+    renderHook(() =>
+      useWebsocket(testUrl, {
+        ...defaultOptions,
+        reconnectAttempts: 2,
+        reconnectWait,
+        onReconnect
       })
     );
     await waitFor(() => expect(onOpen).toHaveBeenCalled());
@@ -184,8 +190,8 @@ describe('sending', () => {
 
     await waitFor(() => expect(onSend).toHaveBeenCalledTimes(3));
     await waitFor(() => expect(onServerMessage).toHaveBeenCalledTimes(3));
-    messages.forEach(
-      (message) => expect(onServerMessage).toHaveBeenCalledWith(Buffer.from(message))
+    messages.forEach((message) =>
+      expect(onServerMessage).toHaveBeenCalledWith(Buffer.from(message))
     );
   });
 });
