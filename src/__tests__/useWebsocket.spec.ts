@@ -1,41 +1,49 @@
 import net from 'net';
 import { renderHook, act, waitFor } from '@testing-library/react';
+import WebSocket, { Server, WebSocket as wsWebSocket } from 'ws';
+import { IncomingMessage } from 'http';
 import useWebsocket from '..';
-import { CONNECTION_STATES, ERRORS } from '../constants';
+import { ERRORS } from '../constants';
+import { Logger, WebSocketOptions } from '../types';
 
-const { CONNECTING, OPEN } = CONNECTION_STATES;
-const { RECONNECT_LIMIT_EXCEEDED, WS_SUPPORTED } = ERRORS;
-const { WebSocketServer, WebSocket } = global;
+const CONNECTING = 'CONNECTING';
+const OPEN = 'OPEN';
 
-const portResolver = () =>
+// this is needed to include the WebSocketServer type from the jest global config
+type CustomGlobal = typeof globalThis & { WebSocketServer: typeof wsWebSocket.Server };
+
+const { RECONNECT_LIMIT_EXCEEDED, WS_UNSUPPORTED } = ERRORS;
+const { WebSocketServer } = global as CustomGlobal;
+
+const portResolver = (): Promise<number> =>
   new Promise((resolve, reject) => {
     const server = net.createServer();
     server.on('error', reject);
     server.listen(0, () => {
-      const { port } = server.address();
+      const { port } = server.address() as net.AddressInfo;
       server.close(() => resolve(port));
     });
   });
 
-let port;
-let testUrl;
+let port: number;
+let testUrl: string | URL;
 
 beforeAll(async () => {
   port = await portResolver();
   testUrl = `ws://localhost:${port}/`;
 });
 
-const logger = {
+const logger: Logger = {
   error: jest.fn(),
   warn: jest.fn()
 };
 
-let wss;
-let ws;
-let error;
+let wss: Server<typeof WebSocket, typeof IncomingMessage>;
+let ws: WebSocket;
+let error: Event | undefined;
 
 // client events
-const onError = jest.fn((err) => {
+const onError = jest.fn((err: Event) => {
   error = err;
 });
 const onOpen = jest.fn();
@@ -58,7 +66,7 @@ const startServer = () => {
 
 const closeConnections = () => wss.clients.forEach((socket) => socket.close());
 
-const defaultOptions = {
+const defaultOptions: WebSocketOptions = {
   onError,
   logger,
   onOpen,
@@ -80,18 +88,19 @@ afterEach(() => {
   onServerConnect.mockReset();
   onServerMessage.mockReset();
 
-  logger.error.mockReset();
-  logger.warn.mockReset();
+  (logger.error as jest.Mock).mockReset();
+  (logger.warn as jest.Mock).mockReset();
 
   if (wss) wss.close();
 });
 
 describe('invocation', () => {
   it('fails when websockets are unavailable', () => {
-    delete global.WebSocket;
+    const originalWebSocket = global.WebSocket;
+    delete (global as Partial<CustomGlobal>).WebSocket;
     renderHook(() => useWebsocket(testUrl, defaultOptions));
-    expect(logger.warn).toHaveBeenCalledWith(WS_SUPPORTED);
-    global.WebSocket = WebSocket;
+    expect(logger.warn).toHaveBeenCalledWith(WS_UNSUPPORTED);
+    global.WebSocket = originalWebSocket;
   });
 
   it('fails when unable to connect with basic options', async () => {
@@ -140,13 +149,11 @@ describe('connections', () => {
     const reconnectWait = 250;
     startServer();
 
-    const onReconnect = jest.fn();
     renderHook(() =>
       useWebsocket(testUrl, {
         ...defaultOptions,
         reconnectAttempts: 2,
-        reconnectWait,
-        onReconnect
+        reconnectWait
       })
     );
     await waitFor(() => expect(onOpen).toHaveBeenCalled());

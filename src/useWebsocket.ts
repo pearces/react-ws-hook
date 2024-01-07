@@ -1,21 +1,35 @@
 import { useRef, useState, useEffect } from 'react';
-import { READY_STATES, ERRORS, CONNECTION_STATES, DEFAULT_OPTIONS, ACTIONS } from './constants';
+import {
+  WebSocketOptions,
+  Message,
+  Handlers,
+  MessageData,
+  WebSocketResult,
+  Logger,
+  ReadyStateValue
+} from './types';
+import { READY_STATES, ERRORS, DEFAULT_OPTIONS, ACTIONS } from './constants';
 
-const { WS_SUPPORTED, RECONNECT_LIMIT_EXCEEDED, SEND_ERROR } = ERRORS;
-const { OPEN, CONNECTING, CLOSED } = CONNECTION_STATES;
+const { WS_UNSUPPORTED, RECONNECT_LIMIT_EXCEEDED, SEND_ERROR } = ERRORS;
+const readyStates = Object.keys(READY_STATES) as Array<keyof typeof READY_STATES>;
+const { CONNECTING, OPEN, CLOSED } = READY_STATES;
+
 const { CONNECTING: CONNECT, SENDING, DISCONNECTING } = ACTIONS;
+type Action = (typeof ACTIONS)[keyof typeof ACTIONS];
 
-export default (url, options) => {
-  const ws = useRef(null);
-  const [received, setReceived] = useState(null);
-  const [readyState, setReadyState] = useState(CONNECTING);
-  const messageQueue = useRef([]).current;
-  let lastEvent = useRef(null).current;
+type HandlerEvents = keyof WebSocketEventMap & keyof Handlers;
+
+export default (url: string | URL, options: WebSocketOptions): WebSocketResult => {
+  const ws = useRef<WebSocket | null>(null);
+  const [received, setReceived] = useState<MessageData | null>(null);
+  const [readyState, setReadyState] = useState<ReadyStateValue>(CONNECTING);
+  const messageQueue = useRef<Message[]>([]).current;
+  let lastEvent = useRef<Action | null>(null).current;
   let isReconnecting = useRef(false).current;
 
   const {
     reconnectWait,
-    reconnectAttempts,
+    reconnectAttempts = 0,
     reconnect: shouldReconnect,
     retrySend,
     onSend: sendHandler,
@@ -23,34 +37,35 @@ export default (url, options) => {
     onOpen: openHandler,
     onClose: closeHandler,
     onError: errorHandler,
-    logger
-  } = useRef({ ...DEFAULT_OPTIONS, ...options }).current;
-  const reconnectTimer = useRef(null);
-  const handlers = useRef(null);
-  const reconnects = useRef(reconnectAttempts);
+    logger = DEFAULT_OPTIONS.logger as Logger
+  } = useRef<WebSocketOptions>({ ...DEFAULT_OPTIONS, ...options }).current;
+  const reconnectTimer = useRef<NodeJS.Timeout | null>(null);
+  const handlers = useRef<Handlers | null>(null);
+  const reconnects = useRef<number>(reconnectAttempts);
 
   if (typeof WebSocket === 'undefined') {
-    logger.warn(WS_SUPPORTED);
-    return [() => {}, received, { readyState }];
+    logger.warn(WS_UNSUPPORTED);
+    return { send: () => {}, received, readyState: readyStates[readyState], url };
   }
 
-  const getReadyState = () => READY_STATES[ws?.current?.readyState || 0];
+  const getReadyState = (): ReadyStateValue =>
+    (ws?.current?.readyState || CONNECTING) as ReadyStateValue;
 
-  const updateReadyState = () => {
+  const updateReadyState = (): ReadyStateValue => {
     const connectionState = getReadyState();
     setReadyState(connectionState);
     return connectionState;
   };
 
-  const onError = (error) => {
-    logger.error(`Failed ${lastEvent || ''} ${error.toString()}`);
+  const onError = (error: Event) => {
+    logger.error(`Failed ${lastEvent || ''} ${error.toString()}`); // TODO: check if error.toString() is correct
     updateReadyState();
     if (errorHandler) errorHandler(error);
     lastEvent = null;
   };
 
-  const onMessage = (event) => {
-    const { data } = event;
+  const onMessage = (event: Event | MessageEvent) => {
+    const { data } = event as MessageEvent;
     setReceived(data);
     if (messageHandler) messageHandler(data, event);
   };
@@ -61,9 +76,11 @@ export default (url, options) => {
     lastEvent = CONNECT;
     ws.current = new WebSocket(url);
 
-    Object.keys(handlers.current).forEach((type) =>
-      ws.current.addEventListener(type, handlers.current[type])
-    );
+    if (handlers.current) {
+      (Object.keys(handlers.current) as Array<HandlerEvents>).forEach((type) =>
+        ws?.current?.addEventListener(type, (handlers.current as Handlers)[type])
+      );
+    }
   };
 
   const reconnect = () => {
@@ -78,7 +95,7 @@ export default (url, options) => {
     }, reconnectWait);
   };
 
-  const onClose = (event) => {
+  const onClose = (event: Event) => {
     const { current: reconnectsLeft } = reconnects;
     const willReconnect = shouldReconnect && reconnectsLeft !== 0;
     if (reconnectsLeft === 0) logger.warn(RECONNECT_LIMIT_EXCEEDED);
@@ -87,11 +104,11 @@ export default (url, options) => {
     if (closeHandler) closeHandler(event);
   };
 
-  const send = (message) => {
+  const send = (message: Message) => {
     const currentState = updateReadyState();
     if (currentState === OPEN) {
       lastEvent = SENDING;
-      ws.current.send(message);
+      ws?.current?.send(message);
       if (sendHandler) sendHandler(message);
     } else {
       if (retrySend) messageQueue.push(message);
@@ -101,7 +118,7 @@ export default (url, options) => {
     }
   };
 
-  const onOpen = (event) => {
+  const onOpen = (event: Event) => {
     updateReadyState();
     reconnects.current = reconnectAttempts;
     isReconnecting = false;
@@ -110,7 +127,7 @@ export default (url, options) => {
     if (messageQueue.length) {
       while (messageQueue.length && getReadyState() === OPEN) {
         const message = messageQueue.shift();
-        send(message);
+        if (message !== undefined) send(message);
       }
     }
   };
@@ -130,14 +147,16 @@ export default (url, options) => {
       if (reconnectTimer.current !== null) clearTimeout(reconnectTimer.current);
       if (!ws.current) return;
 
-      Object.keys(handlers.current).forEach((type) =>
-        ws.current.removeEventListener(type, handlers.current[type])
-      );
+      if (handlers.current !== null) {
+        (Object.keys(handlers.current) as Array<HandlerEvents>).forEach((type) =>
+          ws?.current?.removeEventListener(type, (handlers.current as Handlers)[type])
+        );
+      }
       handlers.current = null;
 
       // TODO: check if this works when closing the socket and erroring out
       lastEvent = DISCONNECTING; // eslint-disable-line react-hooks/exhaustive-deps
-      ws.current.onError = onError;
+      ws.current.onerror = onError;
       ws.current.close();
 
       ws.current = null;
@@ -145,11 +164,10 @@ export default (url, options) => {
     []
   );
 
-  const { url: wsUrl } = ws.current;
   return {
     send,
     received,
-    readyState,
-    url: wsUrl
+    readyState: readyStates[readyState],
+    url: ws?.current?.url || url
   };
 };
