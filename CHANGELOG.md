@@ -1,3 +1,10 @@
+## [0.2.2](https://github.com/pearces/react-ws-hook/compare/v0.2.1...v0.2.2) (2024-01-09)
+
+
+### Bug Fixes
+
+* **constants:** correct connection/ready states ([8735e6f](https://github.com/pearces/react-ws-hook/commit/8735e6f6c7481d2d9d424e90501362bf07cc1658))
+
 ## [0.2.1](https://github.com/pearces/react-ws-hook/compare/v0.2.0...v0.2.1) (2023-07-30)
 
 
