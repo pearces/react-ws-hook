@@ -32,7 +32,7 @@
     "node": ">=14.17.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.23.4",
+    "@babel/cli": "^7.23.9",
     "@babel/core": "^7.23.7",
     "@babel/eslint-parser": "^7.23.9",
     "@babel/plugin-transform-runtime": "^7.23.7",
