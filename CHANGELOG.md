@@ -1,3 +1,10 @@
+# [0.3.0](https://github.com/pearces/react-ws-hook/compare/v0.2.2...v0.3.0) (2024-03-04)
+
+
+### Features
+
+* **typescript:** migrate source to typescript ([5407ae7](https://github.com/pearces/react-ws-hook/commit/5407ae7befbf5ed7e1678a32908c67e109157668))
+
 ## [0.2.2](https://github.com/pearces/react-ws-hook/compare/v0.2.1...v0.2.2) (2024-01-09)
 
 
