@@ -73,7 +73,7 @@
     "ts:check": "tsc --noEmit",
     "build:module": "tsc --module es2022 --moduleResolution node --outDir lib/mjs && tsc-alias --outDir lib/mjs && node utils/copy.cjs static/package.mjs.json lib/mjs/package.json",
     "build:node": "tsc --module commonjs --outDir lib/cjs && node utils/copy.cjs static/package.cjs.json lib/cjs/package.json",
-    "generate:types": "tsc --declaration --emitDeclarationOnly --outDir lib",
+    "generate:types": "tsc --removeComments false --declaration --emitDeclarationOnly --outDir lib",
     "build": "npm run clean && npm run build:module && npm run build:node && npm run generate:types",
     "clean": "node utils/clean.cjs lib"
   }
