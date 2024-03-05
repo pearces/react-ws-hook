@@ -1,5 +1,8 @@
 import { WebSocketOptions, ReadyStates } from './types';
 
+/**
+ * Represents the ready states for a WebSocket connection.
+ */
 export const READY_STATES: ReadyStates = {
   CONNECTING: 0,
   OPEN: 1,
@@ -7,6 +10,9 @@ export const READY_STATES: ReadyStates = {
   CLOSED: 3
 } as const;
 
+/**
+ * Error messages used in the hook.
+ */
 export const ERRORS = {
   WS_UNSUPPORTED:
     'Global WebSocket object not supported or unavailable, not running useWebsocket hook',
@@ -14,6 +20,9 @@ export const ERRORS = {
   SEND_ERROR: 'Failed to send message'
 } as const;
 
+/**
+ * Default options for useWebsocket hook.
+ */
 export const DEFAULT_OPTIONS: WebSocketOptions = {
   reconnect: true,
   reconnectWait: 2000,
@@ -22,6 +31,9 @@ export const DEFAULT_OPTIONS: WebSocketOptions = {
   logger: console
 } as const;
 
+/**
+ * WebSocket actions.
+ */
 export const ACTIONS = {
   CONNECTING: 'connecting',
   SENDING: 'sending',
