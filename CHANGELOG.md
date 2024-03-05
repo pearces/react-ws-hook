@@ -1,3 +1,11 @@
+## [0.3.1](https://github.com/pearces/react-ws-hook/compare/v0.3.0...v0.3.1) (2024-03-05)
+
+
+### Bug Fixes
+
+* **build:** don't strip comments from types ([41415d9](https://github.com/pearces/react-ws-hook/commit/41415d90dca308ea54f401bcaf18dfeb4ff043bd))
+* **hook:** add comments and clean up code ([37d828e](https://github.com/pearces/react-ws-hook/commit/37d828e15969194967824e846aa7e1acaeccc5c6))
+
 # [0.3.0](https://github.com/pearces/react-ws-hook/compare/v0.2.2...v0.3.0) (2024-03-04)
 
 
