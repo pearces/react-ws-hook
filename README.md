@@ -34,10 +34,10 @@ import useWebsocket from '@pearces/react-ws-hook';
 Then reference it in your component:
 
 ```javascript
-const { sendMessage, lastMessage, readyState } = useWebsocket('ws://localhost:8080');
+const { send, received, readyState } = useWebsocket('ws://localhost:8080');
 ```
 
-You can then use the `sendMessage` function to send messages to the server, and the `lastMessage` and `readyState` variables to read the last message received and the current state of the WebSocket connection.
+You can then use the `send` function to send messages to the server, and the `received` and `readyState` variables to read the last message received and the current state of the WebSocket connection.
 
 ## API Reference
 
@@ -66,8 +66,8 @@ An optional object containing the following properties:
 
 The result of the `useWebsocket` hook is an object containing the following properties:
 
-- `sendMessage` - A function that sends a message to the server. It takes a single `string` argument that is the message to send.
-- `lastMessage` - The last message received from the server. It is `null` if no message has been received, otherwise it is a `string`, `ArrayBuffer`, `ArrayBufferView`, `Blob`, or `FormData` object.
+- `send` - A function that sends a message to the server. It takes a single `string` argument that is the message to send.
+- `received` - The last message received from the server. It is `null` if no message has been received, otherwise it is a `string`, `ArrayBuffer`, `ArrayBufferView`, `Blob`, or `FormData` object.
 - `readyState` - The current state of the WebSocket connection. It is one of the following values: `CONNECTING`, `OPEN`, `CLOSING`, or `CLOSED`.
 - `url` - The URL of the WebSocket server for the current connection.
 
