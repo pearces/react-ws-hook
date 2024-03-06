@@ -1,3 +1,10 @@
+## [0.3.3](https://github.com/pearces/react-ws-hook/compare/v0.3.2...v0.3.3) (2024-03-06)
+
+
+### Bug Fixes
+
+* **readme:** include the actual hook return values ([6f4dc0e](https://github.com/pearces/react-ws-hook/commit/6f4dc0e52840c08b06621b56a7312127bab03310))
+
 ## [0.3.2](https://github.com/pearces/react-ws-hook/compare/v0.3.1...v0.3.2) (2024-03-06)
 
 
