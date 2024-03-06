@@ -4,7 +4,7 @@ A custom React hook to communicate over WebSockets.
 
 ## Installation
 
-To install the `react-ws-hook` package you first need to get an access token and add it your `.npmrc` to use the GitHub npm registry [following these instructions](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry).
+To install the `react-ws-hook` package you first need to get an access token and add it to your `.npmrc` to use the GitHub npm registry [following these instructions](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry).
 
 Then you can install the package using npm or yarn:
 
