@@ -1,3 +1,10 @@
+## [0.3.2](https://github.com/pearces/react-ws-hook/compare/v0.3.1...v0.3.2) (2024-03-06)
+
+
+### Bug Fixes
+
+* **readme:** add package documentation ([59b9405](https://github.com/pearces/react-ws-hook/commit/59b9405e1d350d8151ec7d11ae5f86efc419109c))
+
 ## [0.3.1](https://github.com/pearces/react-ws-hook/compare/v0.3.0...v0.3.1) (2024-03-05)
 
 
