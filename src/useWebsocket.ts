@@ -51,7 +51,12 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
 
   if (typeof WebSocket === 'undefined') {
     logger.warn(WS_UNSUPPORTED);
-    return { send: () => {}, received, readyState: readyStates[readyState], url };
+    return {
+      send: () => {},
+      received,
+      readyState: readyStates[typeof window !== 'undefined' ? CLOSED : readyState], // only set to CLOSED if running in a browser to avoid breaking SSR
+      url
+    };
   }
 
   /**
@@ -197,13 +202,12 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
       }
       handlers.current = null;
 
-      // TODO: check if this works when closing the socket and erroring out
-      lastEvent = DISCONNECTING; // eslint-disable-line react-hooks/exhaustive-deps
-      if (ws.current) {
-        ws.current.onerror = onError;
+      ws.current.onerror = onError;
+      if (ws.current.readyState === OPEN) {
+        lastEvent = DISCONNECTING; // eslint-disable-line react-hooks/exhaustive-deps
         ws.current.close();
-        ws.current = null;
       }
+      ws.current = null;
     },
     []
   );
