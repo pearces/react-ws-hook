@@ -10,30 +10,59 @@ export type Message = string | ArrayBuffer | Blob | ArrayBufferView | DataView;
  */
 export type MessageData = string | ArrayBuffer | Blob;
 
-/**
- * Represents a logger object with error and warn methods.
- */
+/** Represents a logger object with error and warn methods. */
 export type Logger = Pick<Console, 'error' | 'warn'>;
 
-/**
- * Represents the options for configuring a WebSocket connection.
- */
+/** Represents the options for configuring a WebSocket connection. */
 export interface WebSocketOptions {
+  /** The time to wait (in milliseconds) before attempting to reconnect after a disconnect. */
   reconnectWait?: number;
+
+  /** The maximum number of attempts to reconnect. */
   reconnectAttempts?: number;
+
+  /** Indicates whether the hook will automatically reconnect after being disconnected. */
   reconnect?: boolean;
+
+  /** Indicates whether to retry sending a message if the WebSocket connection is not open. */
   retrySend?: boolean;
+
+  /**
+   * A callback function that will be called before sending a message.
+   * @param message The message to be sent.
+   */
   onSend?: (message: Message) => void;
+
+  /**
+   * A callback function that will be called when a message is received.
+   * @param data The parsed message data.
+   * @param event The original WebSocket event or MessageEvent.
+   */
   onMessage?: (data: MessageData, event: Event | MessageEvent) => void;
+
+  /**
+   * A callback function that will be called when the WebSocket connection is opened.
+   * @param event The WebSocket event.
+   */
   onOpen?: (event: Event) => void;
+
+  /**
+   * A callback function that will be called when the WebSocket connection is closed.
+   * @param event The WebSocket event.
+   */
   onClose?: (event: Event) => void;
+
+  /**
+   * A callback function that will be called when an error occurs in the WebSocket connection.
+   * @param error The WebSocket error event.
+   */
   onError?: (error: Event) => void;
+
+  /** A logger instance or console object to use for logging WebSocket events and errors. */
   logger?: Logger | Console;
 }
 
-/**
- * Represents a collection of event handlers for a WebSocket connection.
- */
+/** Represents a collection of event handlers for a WebSocket connection. */
 export interface Handlers {
   /**
    * Handles the 'message' event.
@@ -66,27 +95,29 @@ export interface Handlers {
   [key: string]: (event: Event | MessageEvent) => void;
 }
 
-/**
- * Represents the possible ready states of a WebSocket connection.
- */
+/** Represents the possible ready states of a WebSocket connection. */
 export type ReadyStates = Pick<WebSocket, 'CONNECTING' | 'OPEN' | 'CLOSING' | 'CLOSED'>;
 
-/**
- * Represents a ready state of a WebSocket connection.
- */
+/** Represents a ready state of a WebSocket connection. */
 export type ReadyState = keyof ReadyStates;
 
-/**
- * Represents the value of the ready state.
- */
+/** Represents the value of the ready state. */
 export type ReadyStateValue = ReadyStates[keyof ReadyStates];
 
-/**
- * Represents the result of the useWebsocket hook.
- */
+/** Represents the result of the useWebsocket hook. */
 export interface WebSocketResult {
+  /**
+   * Sends a message through the WebSocket connection.
+   * @param message The message to send.
+   */
   send: (message: Message) => void;
+
+  /** The last received message data, or null if no message has been received yet. */
   received: MessageData | null;
+
+  /** The current state of the WebSocket connection. */
   readyState: ReadyState;
+
+  /** The URL of the WebSocket connection. */
   url: string | URL;
 }

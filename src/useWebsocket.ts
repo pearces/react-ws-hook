@@ -19,6 +19,12 @@ type Action = (typeof ACTIONS)[keyof typeof ACTIONS];
 
 type HandlerEvents = keyof WebSocketEventMap & keyof Handlers;
 
+/**
+ * Custom WebSocket hook for using WebSocket connections in React.
+ * @param url - The URL of the WebSocket server.
+ * @param options - Additional options for configuring the WebSocket connection.
+ * @returns An object containing the WebSocket connection state, received messages a method for sending messages.
+ */
 export default (url: string | URL, options: WebSocketOptions): WebSocketResult => {
   const ws = useRef<WebSocket | null>(null);
   const [received, setReceived] = useState<MessageData | null>(null);
@@ -67,7 +73,7 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
 
   /**
    * Handles the error event for the WebSocket connection.
-   * @param {Event} error - The error event object.
+   * @param error - The error event object.
    */
   const onError = (error: Event) => {
     logger.error(`Failed ${lastEvent || ''} ${JSON.stringify(error)}`);
