@@ -1,3 +1,11 @@
+## [0.3.4](https://github.com/pearces/react-ws-hook/compare/v0.3.3...v0.3.4) (2024-03-07)
+
+
+### Bug Fixes
+
+* **hook:** fix disconnect status/error on start ([886eeed](https://github.com/pearces/react-ws-hook/commit/886eeed8d54dd1a1cf1836a60865808f19ac72fa))
+* **jsdoc:** added/updated jsdoc annotations ([0cdf60e](https://github.com/pearces/react-ws-hook/commit/0cdf60e35598decdc645f55afa4544ad950c0398))
+
 ## [0.3.3](https://github.com/pearces/react-ws-hook/compare/v0.3.2...v0.3.3) (2024-03-06)
 
 
