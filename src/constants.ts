@@ -1,4 +1,4 @@
-import { WebSocketOptions, ReadyStates } from './types';
+import { WebSocketOptions, ReadyStates, HandlerEvents } from './types';
 
 /**  Represents the ready states for a WebSocket connection. */
 export const READY_STATES: ReadyStates = {
@@ -31,3 +31,6 @@ export const ACTIONS = {
   SENDING: 'sending',
   DISCONNECTING: 'disconnecting'
 } as const;
+
+/** Represents the possible WebSocket event types. */
+export const HANDLER_EVENTS: Array<HandlerEvents> = ['open', 'close', 'error', 'message'];

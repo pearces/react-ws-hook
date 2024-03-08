@@ -6,9 +6,11 @@ import {
   MessageData,
   WebSocketResult,
   Logger,
-  ReadyStateValue
+  ReadyStateValue,
+  EventListenerBindAction,
+  HandlerEvents
 } from './types';
-import { READY_STATES, ERRORS, DEFAULT_OPTIONS, ACTIONS } from './constants';
+import { READY_STATES, ERRORS, DEFAULT_OPTIONS, ACTIONS, HANDLER_EVENTS } from './constants';
 
 const { WS_UNSUPPORTED, RECONNECT_LIMIT_EXCEEDED, SEND_ERROR } = ERRORS;
 const readyStates = Object.keys(READY_STATES) as Array<keyof typeof READY_STATES>;
@@ -16,8 +18,6 @@ const { CONNECTING, OPEN, CLOSED } = READY_STATES;
 
 const { CONNECTING: CONNECT, SENDING, DISCONNECTING } = ACTIONS;
 type Action = (typeof ACTIONS)[keyof typeof ACTIONS];
-
-type HandlerEvents = keyof WebSocketEventMap & keyof Handlers;
 
 /**
  * Custom WebSocket hook for using WebSocket connections in React.
@@ -46,7 +46,28 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
     logger = DEFAULT_OPTIONS.logger as Logger
   } = useRef<WebSocketOptions>({ ...DEFAULT_OPTIONS, ...options }).current;
   let reconnectTimer = useRef<NodeJS.Timeout | null>(null).current;
-  const handlers = useRef<Handlers | null>(null);
+
+  /* eslint-disable no-use-before-define */
+  const handlers = useRef<Handlers>({
+    open: onOpen,
+    close: onClose,
+    error: onError,
+    message: onMessage,
+    bind: () => setEventListeners('addEventListener'),
+    unbind: () => setEventListeners('removeEventListener')
+  });
+  /* eslint-enable no-use-before-define */
+
+  /**
+   * Adds or removes event listeners on the WebSocket instance based on the specified action.
+   * @param action - The action to perform on the WebSocket instance.
+   */
+  function setEventListeners(action: keyof EventListenerBindAction) {
+    HANDLER_EVENTS.forEach((type: HandlerEvents) =>
+      ws.current?.[action](type, handlers.current[type])
+    );
+  }
+
   let reconnects = useRef<number>(reconnectAttempts).current;
 
   if (typeof WebSocket === 'undefined') {
@@ -80,22 +101,22 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
    * Handles the error event for the WebSocket connection.
    * @param error - The error event object.
    */
-  const onError = (error: Event) => {
+  function onError(error: Event) {
     logger.error(`Failed ${lastEvent || ''} ${JSON.stringify(error)}`);
     updateReadyState();
     if (errorHandler) errorHandler(error);
     lastEvent = null;
-  };
+  }
 
   /**
    * Handles the incoming WebSocket message event.
    * @param event - The WebSocket message event.
    */
-  const onMessage = (event: Event | MessageEvent) => {
+  function onMessage(event: Event | MessageEvent) {
     const { data } = event as MessageEvent;
     setReceived(data);
     if (messageHandler) messageHandler(data, event);
-  };
+  }
 
   /**
    * Creates a WebSocket connection and sets up event handlers.
@@ -106,12 +127,7 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
 
     lastEvent = CONNECT;
     ws.current = new WebSocket(url);
-
-    if (handlers.current) {
-      (Object.keys(handlers.current) as Array<HandlerEvents>).forEach((type) =>
-        ws.current?.addEventListener(type, (handlers.current as Handlers)[type])
-      );
-    }
+    handlers.current.bind();
   };
 
   /**
@@ -136,13 +152,13 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
    * Event handler for the WebSocket 'close' event.
    * @param event - The 'close' event object.
    */
-  const onClose = (event: Event) => {
+  function onClose(event: Event) {
     const willReconnect = shouldReconnect && reconnects !== 0;
     if (reconnects === 0) logger.warn(RECONNECT_LIMIT_EXCEEDED);
     if (!willReconnect || readyState !== CONNECTING) updateReadyState();
     if (willReconnect && !isReconnecting) reconnect();
     if (closeHandler) closeHandler(event);
-  };
+  }
 
   /**
    * Sends a message through the WebSocket connection.
@@ -166,7 +182,7 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
    * Event handler for the WebSocket 'open' event.
    * @param event - The 'open' event object.
    */
-  const onOpen = (event: Event) => {
+  function onOpen(event: Event) {
     updateReadyState();
     reconnects = reconnectAttempts;
     isReconnecting = false;
@@ -178,16 +194,8 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
         if (message !== undefined) send(message);
       }
     }
-  };
-
-  if (!handlers.current) {
-    handlers.current = {
-      open: onOpen,
-      close: onClose,
-      error: onError,
-      message: onMessage
-    };
   }
+
   if (!ws.current) createSocket();
 
   useEffect(
@@ -195,12 +203,7 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
       if (reconnectTimer !== null) clearTimeout(reconnectTimer);
       if (!ws.current) return;
 
-      if (handlers.current !== null) {
-        (Object.keys(handlers.current) as Array<HandlerEvents>).forEach((type) =>
-          ws.current?.removeEventListener(type, (handlers.current as Handlers)[type])
-        );
-      }
-      handlers.current = null;
+      handlers.current.unbind();
 
       ws.current.onerror = onError;
       if (ws.current.readyState === OPEN) {

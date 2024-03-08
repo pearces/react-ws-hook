@@ -62,6 +62,9 @@ export interface WebSocketOptions {
   logger?: Logger | Console;
 }
 
+/** Represents an object that binds and unbinds event listeners to a WebSocket. */
+export type EventListenerBindAction = Pick<WebSocket, 'addEventListener' | 'removeEventListener'>;
+
 /** Represents a collection of event handlers for a WebSocket connection. */
 export interface Handlers {
   /**
@@ -88,11 +91,17 @@ export interface Handlers {
    */
   error: (error: Event) => void;
 
+  /** Adds event listener callback handlers to the WebSocket. */
+  bind: () => void;
+
+  /** Removes event listener callback handlers to the WebSocket. */
+  unbind: () => void;
+
   /**
-   * Handles any other event not explicitly defined.
+   * Handles an WebSocket event callback functions or binds/unbinds event listeners to the WebSocket using the specified function.
    * @param event The event object representing the event.
    */
-  [key: string]: (event: Event | MessageEvent) => void;
+  [key: string]: ((event: Event | MessageEvent) => void) | (() => void);
 }
 
 /** Represents the possible ready states of a WebSocket connection. */
@@ -121,3 +130,9 @@ export interface WebSocketResult {
   /** The URL of the WebSocket connection. */
   url: string | URL;
 }
+
+/**
+ * Represents the union of WebSocket event types and the keys of the `Handlers` object.
+ * @template Handlers - The type of the WebSocket event handlers.
+ */
+export type HandlerEvents = keyof WebSocketEventMap & keyof Handlers;
