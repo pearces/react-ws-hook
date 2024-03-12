@@ -62,6 +62,10 @@ export interface WebSocketOptions {
   logger?: Logger | Console;
 }
 
+/** Represents the final WebSocket options after merging with the default options. */
+export type FinalWebSocketOptions = WebSocketOptions &
+  Required<Omit<WebSocketOptions, 'onSend' | 'onMessage' | 'onOpen' | 'onClose' | 'onError'>>;
+
 /** Represents an object that binds and unbinds event listeners to a WebSocket. */
 export type EventListenerBindAction = Pick<WebSocket, 'addEventListener' | 'removeEventListener'>;
 

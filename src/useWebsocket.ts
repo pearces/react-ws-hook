@@ -5,10 +5,10 @@ import {
   Handlers,
   MessageData,
   WebSocketResult,
-  Logger,
   ReadyStateValue,
   EventListenerBindAction,
-  HandlerEvents
+  HandlerEvents,
+  FinalWebSocketOptions
 } from './types';
 import { READY_STATES, ERRORS, DEFAULT_OPTIONS, ACTIONS, HANDLER_EVENTS } from './constants';
 
@@ -35,7 +35,7 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
 
   const {
     reconnectWait,
-    reconnectAttempts = 0,
+    reconnectAttempts,
     reconnect: shouldReconnect,
     retrySend,
     onSend: sendHandler,
@@ -43,8 +43,8 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
     onOpen: openHandler,
     onClose: closeHandler,
     onError: errorHandler,
-    logger = DEFAULT_OPTIONS.logger as Logger
-  } = useRef<WebSocketOptions>({ ...DEFAULT_OPTIONS, ...options }).current;
+    logger
+  } = useRef<FinalWebSocketOptions>({ ...DEFAULT_OPTIONS, ...options }).current;
   let reconnectTimer = useRef<NodeJS.Timeout | null>(null).current;
 
   /* eslint-disable no-use-before-define */
@@ -101,10 +101,10 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
    * Handles the error event for the WebSocket connection.
    * @param error - The error event object.
    */
-  function onError(error: Event) {
+  function onError(this: WebSocket, error: Event) {
     logger.error(`Failed ${lastEvent || ''} ${JSON.stringify(error)}`);
     updateReadyState();
-    if (errorHandler) errorHandler(error);
+    if (errorHandler) errorHandler.call(this, error);
     lastEvent = null;
   }
 
@@ -112,10 +112,10 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
    * Handles the incoming WebSocket message event.
    * @param event - The WebSocket message event.
    */
-  function onMessage(event: Event | MessageEvent) {
+  function onMessage(this: WebSocket, event: Event | MessageEvent) {
     const { data } = event as MessageEvent;
     setReceived(data);
-    if (messageHandler) messageHandler(data, event);
+    if (messageHandler) messageHandler.call(this, data, event);
   }
 
   /**
@@ -127,7 +127,7 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
 
     lastEvent = CONNECT;
     ws.current = new WebSocket(url);
-    handlers.current.bind();
+    handlers.current.bind.call(ws.current);
   };
 
   /**
@@ -152,12 +152,12 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
    * Event handler for the WebSocket 'close' event.
    * @param event - The 'close' event object.
    */
-  function onClose(event: Event) {
+  function onClose(this: WebSocket, event: Event) {
     const willReconnect = shouldReconnect && reconnects !== 0;
     if (reconnects === 0) logger.warn(RECONNECT_LIMIT_EXCEEDED);
     if (!willReconnect || readyState !== CONNECTING) updateReadyState();
     if (willReconnect && !isReconnecting) reconnect();
-    if (closeHandler) closeHandler(event);
+    if (closeHandler) closeHandler.call(this, event);
   }
 
   /**
@@ -169,7 +169,7 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
     if (currentState === OPEN) {
       lastEvent = SENDING;
       ws.current?.send(message);
-      if (sendHandler) sendHandler(message);
+      if (sendHandler) sendHandler.call(ws.current, message);
     } else {
       if (retrySend) messageQueue.push(message);
       else logger.warn(SEND_ERROR);
@@ -182,11 +182,11 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
    * Event handler for the WebSocket 'open' event.
    * @param event - The 'open' event object.
    */
-  function onOpen(event: Event) {
+  function onOpen(this: WebSocket, event: Event) {
     updateReadyState();
     reconnects = reconnectAttempts;
     isReconnecting = false;
-    if (openHandler) openHandler(event);
+    if (openHandler) openHandler.call(this, event);
     lastEvent = null;
     if (messageQueue.length) {
       while (messageQueue.length && getReadyState() === OPEN) {
@@ -203,9 +203,9 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
       if (reconnectTimer !== null) clearTimeout(reconnectTimer);
       if (!ws.current) return;
 
-      handlers.current.unbind();
+      handlers.current.unbind.call(ws.current);
 
-      ws.current.onerror = onError;
+      ws.current.onerror = onError.bind(ws.current);
       if (ws.current.readyState === OPEN) {
         lastEvent = DISCONNECTING; // eslint-disable-line react-hooks/exhaustive-deps
         ws.current.close();

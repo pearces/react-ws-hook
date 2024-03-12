@@ -1,4 +1,4 @@
-import { WebSocketOptions, ReadyStates, HandlerEvents } from './types';
+import { ReadyStates, HandlerEvents, FinalWebSocketOptions } from './types';
 
 /**  Represents the ready states for a WebSocket connection. */
 export const READY_STATES: ReadyStates = {
@@ -17,7 +17,7 @@ export const ERRORS = {
 } as const;
 
 /** Default options for useWebsocket hook. */
-export const DEFAULT_OPTIONS: WebSocketOptions = {
+export const DEFAULT_OPTIONS: FinalWebSocketOptions = {
   reconnect: true,
   reconnectWait: 2000,
   reconnectAttempts: Infinity,
