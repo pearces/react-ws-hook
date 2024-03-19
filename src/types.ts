@@ -1,3 +1,5 @@
+import { ACTIONS } from './constants';
+
 /**
  * Represents a message that can be sent over a WebSocket connection.
  * It can be a string, ArrayBuffer, Blob, ArrayBufferView, or DataView.
@@ -75,7 +77,7 @@ export interface Handlers {
    * Handles the 'message' event.
    * @param event The event object representing the 'message' event.
    */
-  message: (event: Event | MessageEvent) => void;
+  message?: (event: Event | MessageEvent) => void;
 
   /**
    * Handles the 'open' event.
@@ -95,17 +97,11 @@ export interface Handlers {
    */
   error: (error: Event) => void;
 
-  /** Adds event listener callback handlers to the WebSocket. */
-  bind: () => void;
-
-  /** Removes event listener callback handlers to the WebSocket. */
-  unbind: () => void;
-
   /**
    * Handles an WebSocket event callback functions or binds/unbinds event listeners to the WebSocket using the specified function.
    * @param event The event object representing the event.
    */
-  [key: string]: ((event: Event | MessageEvent) => void) | (() => void);
+  [key: string]: ((event: Event | MessageEvent) => void) | undefined;
 }
 
 /** Represents the possible ready states of a WebSocket connection. */
@@ -140,3 +136,30 @@ export interface WebSocketResult {
  * @template Handlers - The type of the WebSocket event handlers.
  */
 export type HandlerEvents = keyof WebSocketEventMap & keyof Handlers;
+
+/** Represents the possible WebSocket event types. */
+export type Action = (typeof ACTIONS)[keyof typeof ACTIONS];
+
+/** Represents the resulting state of the WebSocket wrapper instance */
+export type WebSocketWrapperResult = {
+  /** The current WebSocket */
+  ws: WebSocket;
+
+  /** Subscribes to the ready state of the WebSocket connection. */
+  readyStateSubscribe: (callback: (event?: Event) => void) => () => void;
+
+  /** Unsubscribes from the ready state of the WebSocket connection. */
+  readyStateUnsubscribe: (callback: (event?: Event) => void) => void;
+
+  /** Returns the current ready state of the WebSocket connection. */
+  getReadyState: () => ReadyStateValue;
+
+  /** Reconnects to the WebSocket server. */
+  reconnect: () => void;
+
+  /** Disables all event listeners on the WebSocket instance. */
+  disableAllListeners: () => void;
+
+  /** Terminates the current WebSocket */
+  kill: () => void;
+};

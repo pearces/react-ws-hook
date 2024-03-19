@@ -73,7 +73,7 @@ const defaultOptions: WebSocketOptions = {
   onClose,
   onMessage,
   onSend,
-  reconnectWait: 100
+  reconnectWait: 200
 };
 
 afterEach(() => {
@@ -103,18 +103,6 @@ describe('invocation', () => {
     global.WebSocket = originalWebSocket;
   });
 
-  it('fails when unable to connect with basic options', async () => {
-    const { result } = renderHook(() => useWebsocket(testUrl, defaultOptions));
-
-    const { readyState, url } = result.current;
-    expect(readyState).toEqual(CONNECTING);
-    expect(url).toEqual(testUrl);
-    expect(error).toBeUndefined();
-
-    await waitFor(() => expect(onError).toHaveBeenCalled());
-    expect(logger.error).toHaveBeenCalled();
-  });
-
   it('connects with basic options', async () => {
     startServer();
 
@@ -126,6 +114,20 @@ describe('invocation', () => {
     expect(onError).not.toHaveBeenCalled();
 
     expect(onServerConnect).toHaveBeenCalled();
+  });
+
+  it('fails when unable to connect with basic options', async () => {
+    const { result } = renderHook(() =>
+      useWebsocket(testUrl, { ...defaultOptions, reconnect: false })
+    );
+
+    const { readyState, url } = result.current;
+    expect(readyState).toEqual(CONNECTING);
+    expect(url).toEqual(testUrl);
+    expect(error).toBeUndefined();
+
+    await waitFor(() => expect(onError).toHaveBeenCalled());
+    expect(logger.error).toHaveBeenCalled();
   });
 });
 

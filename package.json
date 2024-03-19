@@ -69,7 +69,7 @@
   "scripts": {
     "test": "npm run lint && npm run ts:check && npm run unit",
     "lint": "eslint src",
-    "unit": "jest",
+    "unit": "jest --runInBand",
     "ts:check": "tsc --noEmit",
     "build:module": "tsc --module es2022 --moduleResolution node --outDir lib/mjs && tsc-alias --outDir lib/mjs && node utils/copy.cjs static/package.mjs.json lib/mjs/package.json",
     "build:node": "tsc --module commonjs --outDir lib/cjs && node utils/copy.cjs static/package.cjs.json lib/cjs/package.json",
