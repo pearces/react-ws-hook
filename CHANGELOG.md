@@ -1,3 +1,13 @@
+## [0.3.5](https://github.com/pearces/react-ws-hook/compare/v0.3.4...v0.3.5) (2024-03-23)
+
+
+### Bug Fixes
+
+* **hook:** move ws logic again into 3 separate files by function, switched back to useState for readyState, fixes to (re)creating and binding event listeners ([67f763c](https://github.com/pearces/react-ws-hook/commit/67f763c3658b3d7d1cb5f989b6c7fa26c3576950))
+* **hook:** move ws logic into wrapper, use useSyncExternalStore hook to subscribe to readyState changes ([fc94aad](https://github.com/pearces/react-ws-hook/commit/fc94aadfc4eb0ff939b4812b3d3ca5434257ef4d))
+* **hook:** refactor event listener binding ([4fc5623](https://github.com/pearces/react-ws-hook/commit/4fc5623dbc921f9971c380403255b58123c4f087))
+* **hook:** rework option types, add this bindings ([34436ab](https://github.com/pearces/react-ws-hook/commit/34436abbacde5810dbce9d7960a04599c8a08f11))
+
 ## [0.3.4](https://github.com/pearces/react-ws-hook/compare/v0.3.3...v0.3.4) (2024-03-07)
 
 
