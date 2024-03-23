@@ -73,7 +73,7 @@ const defaultOptions: WebSocketOptions = {
   onClose,
   onMessage,
   onSend,
-  reconnectWait: 200
+  reconnectWait: 150
 };
 
 afterEach(() => {
@@ -138,13 +138,15 @@ describe('connections', () => {
     const { result } = renderHook(() => useWebsocket(testUrl, defaultOptions));
 
     await waitFor(() => expect(onOpen).toHaveBeenCalled());
-    const { readyState } = result.current;
 
     closeConnections();
 
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
+
+    await waitFor(() => expect(onServerConnect).toHaveBeenCalledTimes(2));
     await waitFor(() => expect(onOpen).toHaveBeenCalledTimes(2));
-    expect(readyState).toEqual(OPEN);
-    expect(onServerConnect).toHaveBeenCalledTimes(2);
+    const { readyState } = result.current;
+    await waitFor(() => expect(readyState).toEqual(OPEN));
   });
 
   it('reconnect attempts are delayed according to reconnectWait', async () => {
@@ -178,6 +180,8 @@ describe('sending', () => {
     const { result } = renderHook(() => useWebsocket(testUrl, defaultOptions));
     const { send } = result.current;
 
+    await waitFor(() => expect(onOpen).toHaveBeenCalled());
+
     const message = 'a string message';
     act(() => {
       send(message);
@@ -197,6 +201,7 @@ describe('sending', () => {
       startServer();
     });
 
+    await waitFor(() => expect(onOpen).toHaveBeenCalled());
     await waitFor(() => expect(onSend).toHaveBeenCalledTimes(3));
     await waitFor(() => expect(onServerMessage).toHaveBeenCalledTimes(3));
     messages.forEach((message) =>
@@ -218,7 +223,6 @@ describe('receiving', () => {
     });
 
     await waitFor(() => expect(onMessage).toHaveBeenCalledWith(message, expect.any(Object)));
-    const { received } = result.current;
-    expect(received).toEqual(message);
+    await waitFor(() => expect(result.current.received).toEqual(message));
   });
 });

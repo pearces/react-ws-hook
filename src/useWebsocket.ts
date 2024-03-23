@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useSyncExternalStore } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import {
   WebSocketOptions,
   Message,
@@ -7,10 +7,11 @@ import {
   ReadyStateValue,
   FinalWebSocketOptions,
   Action,
-  WebSocketWrapperResult
+  Handlers
 } from './types';
 import { READY_STATES, ERRORS, DEFAULT_OPTIONS, ACTIONS } from './constants';
-import websocketWrapper from './websocketWrapper';
+import { getReadyState, reconnect as wsReconnect, kill, connect } from './websocket';
+import { removeAllListeners } from './listeners';
 
 const { WS_UNSUPPORTED, RECONNECT_LIMIT_EXCEEDED, SEND_ERROR } = ERRORS;
 const readyStates = Object.keys(READY_STATES) as Array<keyof typeof READY_STATES>;
@@ -25,9 +26,11 @@ const { CONNECTING: CONNECT, SENDING, DISCONNECTING } = ACTIONS;
  */
 export default (url: string | URL, options: WebSocketOptions): WebSocketResult => {
   const [received, setReceived] = useState<MessageData | null>(null);
+  const [readyState, setReadyState] = useState<ReadyStateValue>(CONNECTING);
   const messageQueue = useRef<Message[]>([]).current;
   let lastEvent = useRef<Action | null>(null).current;
   let isReconnecting = useRef(false).current;
+  let currentReadyState = useRef<ReadyStateValue>(readyState).current;
 
   const combinedOptions = useRef<FinalWebSocketOptions>({ ...DEFAULT_OPTIONS, ...options }).current;
   const {
@@ -50,35 +53,22 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
     return {
       send: () => {},
       received,
-      readyState: readyStates[typeof window !== 'undefined' ? CLOSED : CONNECTING], // only set to CLOSED if running in a browser to avoid breaking SSR
+      readyState: readyStates[typeof window !== 'undefined' ? CLOSED : readyState], // only set to CLOSED if running in a browser to avoid breaking SSR
       url
     };
   }
 
-  /* eslint-disable no-use-before-define */
-  const {
-    ws,
-    readyStateSubscribe,
-    getReadyState,
-    reconnect: wsReconnect,
-    disableAllListeners,
-    kill
-  } = useRef<WebSocketWrapperResult>(
-    websocketWrapper(url, {
-      open: onOpen,
-      close: onClose,
-      error: onError,
-      message: onMessage
-    })
-  ).current;
-  /* eslint-enable no-use-before-define */
+  const ws = useRef<WebSocket | null>(null);
+  const readyStateSubs = useRef<Set<() => void>>(new Set<() => void>()).current;
 
-  /** Subscribes to the ready state of the WebSocket connection. */
-  const readyState = useSyncExternalStore<ReadyStateValue>(
-    readyStateSubscribe,
-    getReadyState,
-    getReadyState
-  );
+  /* eslint-disable no-use-before-define */
+  const handlers = useRef<Handlers>({
+    open: onOpen,
+    close: onClose,
+    error: onError,
+    message: onMessage
+  }).current;
+  /* eslint-enable no-use-before-define */
 
   /**
    * Handles the error event for the WebSocket connection.
@@ -109,9 +99,12 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
   function reconnect() {
     isReconnecting = true;
     reconnectTimer = setTimeout(() => {
-      if (ws.readyState === CLOSED && reconnects.current > 0) {
+      if (
+        (currentReadyState === CLOSED || currentReadyState === CONNECTING) &&
+        reconnects.current > 0
+      ) {
         lastEvent = CONNECT;
-        wsReconnect();
+        if (currentReadyState === CLOSED) wsReconnect(ws, url, handlers, readyStateSubs);
         reconnects.current -= 1;
         reconnect();
       } else {
@@ -126,10 +119,10 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
    * @param event - The 'close' event object.
    */
   function onClose(event: Event) {
-    const willReconnect = shouldReconnect && reconnects.current >= 0;
+    const willReconnect = shouldReconnect && reconnects.current > 0;
     if (reconnects.current === 0) logger.warn(RECONNECT_LIMIT_EXCEEDED);
-    if (willReconnect && !isReconnecting) reconnect();
     if (closeHandler) closeHandler(event);
+    if (willReconnect && !isReconnecting) reconnect();
   }
 
   /**
@@ -137,10 +130,11 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
    * @param message - The message to send through the WebSocket connection.
    */
   function send(message: Message) {
-    const currentState = ws.readyState;
+    const currentState: ReadyStateValue = getReadyState(ws.current);
+
     if (currentState === OPEN) {
       lastEvent = SENDING;
-      ws.send(message);
+      ws.current?.send(message);
       if (sendHandler) sendHandler(message);
     } else {
       if (retrySend) messageQueue.push(message);
@@ -161,28 +155,39 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
     lastEvent = null;
 
     if (messageQueue.length) {
-      while (messageQueue.length && readyState === OPEN) {
+      while (messageQueue.length && currentReadyState === OPEN) {
         const message = messageQueue.shift();
         if (message !== undefined) send(message);
       }
     }
   }
 
+  const readyStateCallback = useCallback(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    currentReadyState = getReadyState(ws.current);
+    setReadyState(() => currentReadyState);
+  }, []);
+
   useEffect(() => {
-    lastEvent = CONNECT; // eslint-disable-line react-hooks/exhaustive-deps
+    if (!ws.current) {
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      lastEvent = CONNECT;
+      connect(ws, url, handlers, readyStateSubs, readyStateCallback);
+    }
 
     return () => {
       if (reconnectTimer !== null) clearTimeout(reconnectTimer);
-      if (!ws) return;
+      if (!ws.current) return;
 
-      disableAllListeners();
+      removeAllListeners(ws.current as WebSocket, handlers, readyStateSubs, false);
 
-      ws.onerror = onError;
-      if (readyState === OPEN) {
+      (ws.current as WebSocket).onerror = onError;
+      if (readyState === OPEN || readyState === CONNECTING) {
         lastEvent = DISCONNECTING; // eslint-disable-line react-hooks/exhaustive-deps
-        ws.close();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        ws.current?.close();
       }
-      kill();
+      kill(ws);
     };
   }, []);
 
@@ -190,6 +195,6 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
     send,
     received,
     readyState: readyStates[readyState],
-    url: ws.url || url
+    url: ws.current?.url || url
   };
 };

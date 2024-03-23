@@ -96,12 +96,6 @@ export interface Handlers {
    * @param error The event object representing the 'error' event.
    */
   error: (error: Event) => void;
-
-  /**
-   * Handles an WebSocket event callback functions or binds/unbinds event listeners to the WebSocket using the specified function.
-   * @param event The event object representing the event.
-   */
-  [key: string]: ((event: Event | MessageEvent) => void) | undefined;
 }
 
 /** Represents the possible ready states of a WebSocket connection. */
@@ -143,10 +137,10 @@ export type Action = (typeof ACTIONS)[keyof typeof ACTIONS];
 /** Represents the resulting state of the WebSocket wrapper instance */
 export type WebSocketWrapperResult = {
   /** The current WebSocket */
-  ws: WebSocket;
+  ws?: WebSocket;
 
   /** Subscribes to the ready state of the WebSocket connection. */
-  readyStateSubscribe: (callback: (event?: Event) => void) => () => void;
+  readyStateSubscribe: (callback: (event?: Event) => void) => void;
 
   /** Unsubscribes from the ready state of the WebSocket connection. */
   readyStateUnsubscribe: (callback: (event?: Event) => void) => void;
