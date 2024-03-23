@@ -133,27 +133,3 @@ export type HandlerEvents = keyof WebSocketEventMap & keyof Handlers;
 
 /** Represents the possible WebSocket event types. */
 export type Action = (typeof ACTIONS)[keyof typeof ACTIONS];
-
-/** Represents the resulting state of the WebSocket wrapper instance */
-export type WebSocketWrapperResult = {
-  /** The current WebSocket */
-  ws?: WebSocket;
-
-  /** Subscribes to the ready state of the WebSocket connection. */
-  readyStateSubscribe: (callback: (event?: Event) => void) => void;
-
-  /** Unsubscribes from the ready state of the WebSocket connection. */
-  readyStateUnsubscribe: (callback: (event?: Event) => void) => void;
-
-  /** Returns the current ready state of the WebSocket connection. */
-  getReadyState: () => ReadyStateValue;
-
-  /** Reconnects to the WebSocket server. */
-  reconnect: () => void;
-
-  /** Disables all event listeners on the WebSocket instance. */
-  disableAllListeners: () => void;
-
-  /** Terminates the current WebSocket */
-  kill: () => void;
-};
