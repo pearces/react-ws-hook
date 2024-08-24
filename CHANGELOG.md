@@ -1,3 +1,10 @@
+## [0.3.6](https://github.com/pearces/react-ws-hook/compare/v0.3.5...v0.3.6) (2024-08-24)
+
+
+### Bug Fixes
+
+* **audit:** bumped micromatch to resolve npm audit failures ([7b1d25b](https://github.com/pearces/react-ws-hook/commit/7b1d25b54bd36f8fbf8b17f2309073c2275ae892))
+
 ## [0.3.5](https://github.com/pearces/react-ws-hook/compare/v0.3.4...v0.3.5) (2024-03-23)
 
 
