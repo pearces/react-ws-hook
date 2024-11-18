@@ -1,3 +1,10 @@
+## [0.3.7](https://github.com/pearces/react-ws-hook/compare/v0.3.6...v0.3.7) (2024-11-18)
+
+
+### Bug Fixes
+
+* **audit:** bumped cross-spawn to resolve npm audit failures ([9758c61](https://github.com/pearces/react-ws-hook/commit/9758c61cb12e7d485d9cc34d9ed70eae72ffd682))
+
 ## [0.3.6](https://github.com/pearces/react-ws-hook/compare/v0.3.5...v0.3.6) (2024-08-24)
 
 
