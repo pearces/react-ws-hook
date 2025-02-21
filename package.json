@@ -61,7 +61,7 @@
     "ts-jest": "^29.2.5",
     "tsc-alias": "^1.8.10",
     "typescript": "^5.7.3",
-    "ws": "^8.18.0"
+    "ws": "^8.18.1"
   },
   "peerDependencies": {
     "react": "^18.3.1"
