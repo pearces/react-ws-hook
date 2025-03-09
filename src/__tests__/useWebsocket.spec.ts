@@ -59,7 +59,7 @@ const startServer = () => {
   wss = new WebSocketServer({ port });
   wss.on('connection', (socket) => {
     ws = socket;
-    ws.on('message', (msg) => onServerMessage(msg));
+    ws.on('message', (msg) => onServerMessage(msg)); // eslint-disable-line @typescript-eslint/no-unsafe-return
     onServerConnect(ws);
   });
 };

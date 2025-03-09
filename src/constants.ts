@@ -33,4 +33,4 @@ export const ACTIONS = {
 } as const;
 
 /** Represents the possible WebSocket event types. */
-export const HANDLER_EVENTS: Array<HandlerEvents> = ['open', 'close', 'error', 'message'];
+export const HANDLER_EVENTS: HandlerEvents[] = ['open', 'close', 'error', 'message'];

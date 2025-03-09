@@ -24,7 +24,7 @@ jobs:
             ${{ runner.OS }}-node-
             ${{ runner.OS }}-
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --force
       - name: Run build
         run: npm run build
       - name: Run unit tests

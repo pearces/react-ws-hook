@@ -16,7 +16,7 @@ const { CLOSED, CONNECTING } = READY_STATES;
  * @returns The ready state value.
  */
 export const getReadyState = (ws?: WebSocket | null): ReadyStateValue =>
-  (ws?.readyState || CONNECTING) as ReadyStateValue;
+  (ws?.readyState ?? CONNECTING) as ReadyStateValue;
 
 /**
  * Synchronizes the ready state with the ready state subscription callbacks.
@@ -46,9 +46,7 @@ export const connect = (
   if (readyStateCallback) {
     readyStateSubscribe(ws.current, readyStateSubs, readyStateCallback);
   } else if (readyStateSubs.size) {
-    readyStateSubs.forEach((callback) =>
-      addListeners(ws.current as WebSocket, callbackToHandlers(callback))
-    );
+    readyStateSubs.forEach((callback) => addListeners(ws.current!, callbackToHandlers(callback)));
   }
   addListeners(ws.current, eventHandlers);
 
@@ -81,6 +79,6 @@ export const reconnect = (
  * @param ws - The WebSocket instance.
  */
 export const kill = (ws: MutableRefObject<WebSocket | null>) => {
-  // eslint-disable-next-line no-param-reassign, @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line no-param-reassign
   ws.current = null;
 };

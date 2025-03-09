@@ -40,7 +40,7 @@ export interface WebSocketOptions {
    * @param data The parsed message data.
    * @param event The original WebSocket event or MessageEvent.
    */
-  onMessage?: (data: MessageData, event: Event | MessageEvent) => void;
+  onMessage?: (data: MessageData | null, event: Event | MessageEvent) => void;
 
   /**
    * A callback function that will be called when the WebSocket connection is opened.

@@ -14,7 +14,7 @@ import { getReadyState, reconnect as wsReconnect, kill, connect } from './websoc
 import { removeAllListeners } from './listeners';
 
 const { WS_UNSUPPORTED, RECONNECT_LIMIT_EXCEEDED, SEND_ERROR } = ERRORS;
-const readyStates = Object.keys(READY_STATES) as Array<keyof typeof READY_STATES>;
+const readyStates = Object.keys(READY_STATES) as (keyof typeof READY_STATES)[];
 const { CONNECTING, OPEN, CLOSED } = READY_STATES;
 const { CONNECTING: CONNECT, SENDING, DISCONNECTING } = ACTIONS;
 
@@ -51,7 +51,7 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
   if (typeof WebSocket === 'undefined') {
     logger.warn(WS_UNSUPPORTED);
     return {
-      send: () => {},
+      send: () => logger.warn(SEND_ERROR),
       received,
       readyState: readyStates[typeof window !== 'undefined' ? CLOSED : readyState], // only set to CLOSED if running in a browser to avoid breaking SSR
       url
@@ -75,7 +75,7 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
    * @param error - The error event object.
    */
   function onError(error: Event) {
-    logger.error(`Failed ${lastEvent || ''} ${JSON.stringify(error)}`);
+    logger.error(`Failed ${lastEvent ?? ''} ${JSON.stringify(error)}`);
     if (errorHandler) errorHandler(error);
     lastEvent = null;
   }
@@ -85,7 +85,8 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
    * @param event - The WebSocket message event.
    */
   function onMessage(event: Event | MessageEvent) {
-    const { data } = event as MessageEvent;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const { data }: { data: MessageData | null } = event as MessageEvent;
     setReceived(data);
     if (messageHandler) messageHandler(data, event);
   }
@@ -108,7 +109,7 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
         reconnects.current -= 1;
         reconnect();
       } else {
-        clearTimeout(reconnectTimer as NodeJS.Timeout);
+        clearTimeout(reconnectTimer!);
         isReconnecting = false;
       }
     }, reconnectWait);
@@ -179,11 +180,11 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
       if (reconnectTimer !== null) clearTimeout(reconnectTimer);
       if (!ws.current) return;
 
-      removeAllListeners(ws.current as WebSocket, handlers, readyStateSubs, false);
+      removeAllListeners(ws.current, handlers, readyStateSubs, false);
 
-      (ws.current as WebSocket).onerror = onError;
+      ws.current.onerror = onError;
       if (readyState === OPEN || readyState === CONNECTING) {
-        lastEvent = DISCONNECTING; // eslint-disable-line react-hooks/exhaustive-deps
+        lastEvent = DISCONNECTING;
         // eslint-disable-next-line react-hooks/exhaustive-deps
         ws.current?.close();
       }
@@ -195,6 +196,6 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
     send,
     received,
     readyState: readyStates[readyState],
-    url: ws.current?.url || url
+    url: ws.current?.url ?? url
   };
 };
