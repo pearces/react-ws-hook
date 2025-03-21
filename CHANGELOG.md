@@ -1,3 +1,10 @@
+## [0.3.8](https://github.com/pearces/react-ws-hook/compare/v0.3.7...v0.3.8) (2025-03-21)
+
+
+### Bug Fixes
+
+* **audit:** bumped @babel/helpers, @babel/runtime to resolve npm audit failures ([0c51a12](https://github.com/pearces/react-ws-hook/commit/0c51a120ed947ee42d15ff65aa9380f0ac64fdd9))
+
 ## [0.3.7](https://github.com/pearces/react-ws-hook/compare/v0.3.6...v0.3.7) (2024-11-18)
 
 
