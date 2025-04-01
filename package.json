@@ -39,7 +39,7 @@
   "devDependencies": {
     "@testing-library/react": "^16.2.0",
     "@types/jest": "^29.5.14",
-    "@types/node": "^22.13.14",
+    "@types/node": "^22.13.17",
     "@types/react": "^18.3.18",
     "@types/ws": "^8.18.0",
     "eslint": "^9.23.0",
