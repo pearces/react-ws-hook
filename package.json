@@ -42,7 +42,7 @@
     "@types/node": "^22.13.14",
     "@types/react": "^18.3.18",
     "@types/ws": "^8.18.0",
-    "eslint": "^9.23.0",
+    "eslint": "^9.24.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-import": "^2.31.0",
