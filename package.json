@@ -41,7 +41,7 @@
     "@types/jest": "^29.5.14",
     "@types/node": "^22.13.14",
     "@types/react": "^18.3.18",
-    "@types/ws": "^8.18.0",
+    "@types/ws": "^8.18.1",
     "eslint": "^9.24.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^10.1.2",
