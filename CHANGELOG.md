@@ -1,3 +1,10 @@
+## [0.3.9](https://github.com/pearces/react-ws-hook/compare/v0.3.8...v0.3.9) (2025-06-12)
+
+
+### Bug Fixes
+
+* **audit:** bumped brace-expansion to resolve npm audit failures ([8624678](https://github.com/pearces/react-ws-hook/commit/862467825a1bea3a23a2d7cfa03b0ee3f635c052))
+
 ## [0.3.8](https://github.com/pearces/react-ws-hook/compare/v0.3.7...v0.3.8) (2025-03-21)
 
 
