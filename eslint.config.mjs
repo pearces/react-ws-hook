@@ -1,21 +1,12 @@
-import { FlatCompat } from '@eslint/eslintrc';
 import eslint from '@eslint/js';
 import { defineConfig, globalIgnores } from 'eslint/config';
 import tseslint from 'typescript-eslint';
+import importPlugin from 'eslint-plugin-import';
 import reactPlugin from 'eslint-plugin-react';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import jestplugin from 'eslint-plugin-jest';
 import prettierRecommended from 'eslint-plugin-prettier/recommended';
-import { fileURLToPath } from 'url';
-import path from 'path';
 import globals from 'globals';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  resolvePluginsRelativeTo: __dirname
-});
 
 export default tseslint.config(
   eslint.configs.recommended,
@@ -31,9 +22,9 @@ export default tseslint.config(
     }
   },
   tseslint.configs.stylisticTypeChecked,
+  importPlugin.flatConfigs.recommended,
   reactPlugin.configs.flat.recommended,
   reactHooksPlugin.configs['recommended-latest'],
-  ...compat.extends('airbnb'),
   {
     files: ['**/*.{ts,tsx,js,jsx}'],
     languageOptions: {
@@ -75,6 +66,9 @@ export default tseslint.config(
         webpack: {
           config: 'webpack.config.js'
         }
+      },
+      react: {
+        version: 'detect'
       }
     }
   },

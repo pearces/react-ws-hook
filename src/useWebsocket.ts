@@ -61,14 +61,12 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
   const ws = useRef<WebSocket | null>(null);
   const readyStateSubs = useRef<Set<() => void>>(new Set<() => void>()).current;
 
-  /* eslint-disable no-use-before-define */
   const handlers = useRef<Handlers>({
     open: onOpen,
     close: onClose,
     error: onError,
     message: onMessage
   }).current;
-  /* eslint-enable no-use-before-define */
 
   /**
    * Handles the error event for the WebSocket connection.

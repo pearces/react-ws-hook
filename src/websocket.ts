@@ -1,4 +1,4 @@
-import { MutableRefObject } from 'react';
+import { RefObject } from 'react';
 import { READY_STATES } from './constants';
 import { Handlers, ReadyStateValue } from './types';
 import {
@@ -35,13 +35,12 @@ const syncReadyState = (ws: WebSocket, readyStateSubs: Set<() => void>) =>
  * @param readyStateCallback - The callback function to be called when the ready state changes.
  */
 export const connect = (
-  ws: MutableRefObject<WebSocket | null>,
+  ws: RefObject<WebSocket | null>,
   url: URL | string,
   eventHandlers: Handlers,
   readyStateSubs: Set<() => void>,
   readyStateCallback?: () => void
 ) => {
-  // eslint-disable-next-line no-param-reassign
   ws.current = new WebSocket(url);
   if (readyStateCallback) {
     readyStateSubscribe(ws.current, readyStateSubs, readyStateCallback);
@@ -61,7 +60,7 @@ export const connect = (
  * @param readyStateSubs - The set of ready state change subscriptions.
  */
 export const reconnect = (
-  ws: MutableRefObject<WebSocket | null>,
+  ws: RefObject<WebSocket | null>,
   url: URL | string,
   eventHandlers: Handlers,
   readyStateSubs: Set<() => void>
@@ -78,7 +77,6 @@ export const reconnect = (
  * Disposes the WebSocket connection.
  * @param ws - The WebSocket instance.
  */
-export const kill = (ws: MutableRefObject<WebSocket | null>) => {
-  // eslint-disable-next-line no-param-reassign
+export const kill = (ws: RefObject<WebSocket | null>) => {
   ws.current = null;
 };
