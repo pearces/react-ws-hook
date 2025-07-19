@@ -6,10 +6,12 @@ import reactPlugin from 'eslint-plugin-react';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import jestplugin from 'eslint-plugin-jest';
 import prettierRecommended from 'eslint-plugin-prettier/recommended';
+import configPrettier from 'eslint-config-prettier/flat';
 import globals from 'globals';
 
 export default tseslint.config(
   eslint.configs.recommended,
+  configPrettier,
   tseslint.configs.recommendedTypeChecked,
   {
     languageOptions: {
