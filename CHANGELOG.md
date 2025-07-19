@@ -1,3 +1,11 @@
+## [0.3.10](https://github.com/pearces/react-ws-hook/compare/v0.3.9...v0.3.10) (2025-07-19)
+
+
+### Bug Fixes
+
+* **audit:** bumped @eslint/core, @eslint/plugin-kit to resolve npm audit failures ([1687c73](https://github.com/pearces/react-ws-hook/commit/1687c73e28332d83fa9b902a0fa7c8b91e208c10))
+* **deps:** upgrade to react 19, update deps and unit tests ([f4fc2d8](https://github.com/pearces/react-ws-hook/commit/f4fc2d8d04652c33a1b35e94c0b7ba337c5d2a7b))
+
 ## [0.3.9](https://github.com/pearces/react-ws-hook/compare/v0.3.8...v0.3.9) (2025-06-12)
 
 

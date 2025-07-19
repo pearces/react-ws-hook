@@ -1,6 +1,6 @@
 {
   "name": "@pearces/react-ws-hook",
-  "version": "0.3.9",
+  "version": "0.3.10",
   "description": "A custom react hook to communicate over websockets",
   "exports": {
     "import": "./lib/mjs/index.js",
