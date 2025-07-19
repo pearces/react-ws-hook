@@ -1,3 +1,10 @@
+## [0.3.11](https://github.com/pearces/react-ws-hook/compare/v0.3.10...v0.3.11) (2025-07-19)
+
+
+### Bug Fixes
+
+* **deps-dev:** remove eslint-config-airbnb, update config and source ([e2ad898](https://github.com/pearces/react-ws-hook/commit/e2ad898c4d6be4013caded46fbd0a28e6361be73))
+
 ## [0.3.10](https://github.com/pearces/react-ws-hook/compare/v0.3.9...v0.3.10) (2025-07-19)
 
 
