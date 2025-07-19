@@ -1,6 +1,6 @@
 import net from 'net';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import WebSocket, { Server, WebSocket as wsWebSocket } from 'ws';
+import WebSocket, { Server } from 'ws';
 import { IncomingMessage } from 'http';
 import useWebsocket from '..';
 import { ERRORS } from '../constants';
@@ -10,7 +10,7 @@ const CONNECTING = 'CONNECTING';
 const OPEN = 'OPEN';
 
 // this is needed to include the WebSocketServer type from the jest global config
-type CustomGlobal = typeof globalThis & { WebSocketServer: typeof wsWebSocket.Server };
+type CustomGlobal = typeof globalThis & { WebSocketServer: typeof Server };
 
 const { RECONNECT_LIMIT_EXCEEDED, WS_UNSUPPORTED } = ERRORS;
 const { WebSocketServer } = global as CustomGlobal;
