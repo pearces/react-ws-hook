@@ -24,11 +24,11 @@ jobs:
           scope: '@spearce'
           cache: 'npm'
       - name: Install dependencies
-        run: npm ci --force
+        run: npm ci
       - name: Run build
         run: npm run build
       - name: Install semantic-release plugins
-        run: npm install --force --no-save @semantic-release/git @semantic-release/changelog
+        run: npm install --no-save @semantic-release/git @semantic-release/changelog
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
