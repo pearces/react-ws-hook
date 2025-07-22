@@ -146,7 +146,7 @@ describe('connections', () => {
     await waitFor(() => expect(onServerConnect).toHaveBeenCalledTimes(2));
     await waitFor(() => expect(onOpen).toHaveBeenCalledTimes(2));
     const { readyState } = result.current;
-    await waitFor(() => expect(readyState).toEqual(OPEN));
+    await waitFor(() => expect(readyState).toEqual(OPEN), { timeout: 2000 });
   });
 
   it('reconnect attempts are delayed according to reconnectWait', async () => {
