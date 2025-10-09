@@ -26,7 +26,6 @@ export default tseslint.config(
   tseslint.configs.stylisticTypeChecked,
   importPlugin.flatConfigs.recommended,
   reactPlugin.configs.flat.recommended,
-  reactHooksPlugin.configs['recommended-latest'],
   {
     files: ['**/*.{ts,tsx,js,jsx}'],
     languageOptions: {
@@ -40,7 +39,8 @@ export default tseslint.config(
     },
     plugins: {
       react: reactPlugin,
-      jest: jestplugin
+      jest: jestplugin,
+      'react-hooks': reactHooksPlugin
     },
     rules: {
       'comma-dangle': ['error', 'never'],
@@ -58,7 +58,8 @@ export default tseslint.config(
         }
       ],
       'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': 'error'
+      '@typescript-eslint/no-unused-vars': 'error',
+      ...reactHooksPlugin.configs['recommended-latest'].rules
     },
     settings: {
       'import/resolver': {
