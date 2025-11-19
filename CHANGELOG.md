@@ -1,3 +1,10 @@
+## [0.3.12](https://github.com/pearces/react-ws-hook/compare/v0.3.11...v0.3.12) (2025-11-19)
+
+
+### Bug Fixes
+
+* **audit:** bump glob to resolve npm audit failures ([4cf8d03](https://github.com/pearces/react-ws-hook/commit/4cf8d032f35ba62a095015b5b89f37f606301854))
+
 ## [0.3.11](https://github.com/pearces/react-ws-hook/compare/v0.3.10...v0.3.11) (2025-07-19)
 
 
