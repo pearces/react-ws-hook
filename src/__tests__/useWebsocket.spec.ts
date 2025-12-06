@@ -132,10 +132,13 @@ describe('invocation', () => {
 });
 
 describe('connections', () => {
+  const reconnectWait = 250;
   it('reconnects when disconnected', async () => {
     startServer();
 
-    const { result } = renderHook(() => useWebsocket(testUrl, defaultOptions));
+    const { result } = renderHook(() =>
+      useWebsocket(testUrl, { ...defaultOptions, reconnectWait })
+    );
 
     await waitFor(() => expect(onOpen).toHaveBeenCalled());
 
@@ -150,7 +153,6 @@ describe('connections', () => {
   });
 
   it('reconnect attempts are delayed according to reconnectWait', async () => {
-    const reconnectWait = 250;
     startServer();
 
     renderHook(() =>

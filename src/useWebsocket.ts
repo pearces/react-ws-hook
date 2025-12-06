@@ -109,6 +109,7 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
       } else {
         clearTimeout(reconnectTimer!);
         isReconnecting = false;
+        if (reconnects.current === 0) logger.warn(RECONNECT_LIMIT_EXCEEDED);
       }
     }, reconnectWait);
   }
