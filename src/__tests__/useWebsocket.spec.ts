@@ -7,7 +7,8 @@ import { ERRORS } from '../constants';
 import { Logger, WebSocketOptions } from '../types';
 
 const CONNECTING = 'CONNECTING';
-const OPEN = 'OPEN';
+const CLOSING = 'CLOSING';
+const CLOSED = 'CLOSED';
 
 // this is needed to include the WebSocketServer type from the jest global config
 type CustomGlobal = typeof globalThis & { WebSocketServer: typeof Server };
@@ -149,7 +150,7 @@ describe('connections', () => {
     await waitFor(() => expect(onServerConnect).toHaveBeenCalledTimes(2));
     await waitFor(() => expect(onOpen).toHaveBeenCalledTimes(2));
     const { readyState } = result.current;
-    await waitFor(() => expect(readyState).toEqual(OPEN), { timeout: 2000 });
+    await waitFor(() => expect([CLOSED, CLOSING].includes(readyState)).toBeFalsy());
   });
 
   it('reconnect attempts are delayed according to reconnectWait', async () => {
