@@ -1,5 +1,5 @@
 import { HANDLER_EVENTS } from './constants';
-import { EventListenerBindAction, HandlerEvents, Handlers } from './types';
+import type { EventListenerBindAction, HandlerEvents, Handlers } from './types';
 
 /**
  * Converts a subscription callback function to a set of event callbacks.

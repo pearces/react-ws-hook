@@ -1,12 +1,12 @@
-import { MutableRefObject } from 'react';
+import type { RefObject } from 'react';
 import { connect, getReadyState, kill, reconnect } from '../websocket';
 import { HANDLER_EVENTS, READY_STATES } from '../constants';
-import { HandlerEvents, Handlers } from '../types';
+import type { HandlerEvents, Handlers } from '../types';
 
 const { CLOSED, CONNECTING } = READY_STATES;
 
 describe('websocket', () => {
-  let ws: MutableRefObject<WebSocket | null>;
+  let ws: RefObject<WebSocket | null>;
   const eventHandlers: Handlers = {
     open: jest.fn(),
     close: jest.fn(),

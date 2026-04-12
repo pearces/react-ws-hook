@@ -1,4 +1,4 @@
-import { ReadyStates, HandlerEvents, FinalWebSocketOptions } from './types';
+import type { ReadyStates, HandlerEvents, FinalWebSocketOptions } from './types';
 
 /**  Represents the ready states for a WebSocket connection. */
 export const READY_STATES: ReadyStates = {

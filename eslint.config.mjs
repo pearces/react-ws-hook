@@ -59,7 +59,9 @@ export default tseslint.config(
       ],
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': 'error',
-      ...reactHooksPlugin.configs['recommended-latest'].rules
+      ...reactHooksPlugin.configs['recommended-latest'].rules,
+      '@typescript-eslint/consistent-type-imports': 'error',
+      '@typescript-eslint/consistent-type-exports': 'error'
     },
     settings: {
       'import/resolver': {

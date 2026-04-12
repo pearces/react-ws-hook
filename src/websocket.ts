@@ -1,6 +1,6 @@
-import { RefObject } from 'react';
+import type { RefObject } from 'react';
 import { READY_STATES } from './constants';
-import { Handlers, ReadyStateValue } from './types';
+import type { Handlers, ReadyStateValue } from './types';
 import {
   addListeners,
   callbackToHandlers,

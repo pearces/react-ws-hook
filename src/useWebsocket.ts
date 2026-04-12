@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
-import {
+import type {
   WebSocketOptions,
   Message,
   MessageData,

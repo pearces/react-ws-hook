@@ -7,7 +7,7 @@ import {
   readyStateSubscribe,
   removeAllListeners
 } from '../listeners';
-import { HandlerEvents, Handlers } from '../types';
+import type { HandlerEvents, Handlers } from '../types';
 
 describe('listeners', () => {
   let ws: WebSocket;

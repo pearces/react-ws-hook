@@ -1,10 +1,11 @@
 import net from 'net';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import WebSocket, { Server } from 'ws';
-import { IncomingMessage } from 'http';
+import type { Server } from 'ws';
+import type WebSocket from 'ws';
+import type { IncomingMessage } from 'http';
 import useWebsocket from '..';
 import { ERRORS } from '../constants';
-import { Logger, WebSocketOptions } from '../types';
+import type { Logger, WebSocketOptions } from '../types';
 
 const CONNECTING = 'CONNECTING';
 const CLOSING = 'CLOSING';

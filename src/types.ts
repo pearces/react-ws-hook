@@ -1,4 +1,4 @@
-import { ACTIONS } from './constants';
+import type { ACTIONS } from './constants';
 
 /**
  * Represents a message that can be sent over a WebSocket connection.
