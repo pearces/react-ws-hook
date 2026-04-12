@@ -1,19 +1,8 @@
 {
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": "./src",
-    "outDir": "./lib",
-    "strictNullChecks": true,
-    "jsx": "react",
-    "target": "es2022",
-    "allowJs": true,
-    "esModuleInterop": true,
-    "moduleResolution": "node",
-    "strict": true,
-    "removeComments": true
-  },
-  "include": ["./src/**/*"],
-  "exclude": ["./src/**/__tests__", "./src/coverage"],
-  "tsc-alias": {
-    "resolveFullPaths": true
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "types": ["node", "jest"]
   }
 }

@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "rootDir": "./src",
+    "strictNullChecks": true,
+    "jsx": "react",
+    "target": "es2022",
+    "allowJs": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "removeComments": true
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["./src/coverage"],
+  "tsc-alias": {
+    "resolveFullPaths": true
+  }
+}

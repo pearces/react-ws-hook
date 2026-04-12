@@ -4,7 +4,7 @@ import { ACTIONS } from './constants';
  * Represents a message that can be sent over a WebSocket connection.
  * It can be a string, ArrayBuffer, Blob, ArrayBufferView, or DataView.
  */
-export type Message = string | ArrayBuffer | Blob | ArrayBufferView | DataView;
+export type Message = string | Blob | ArrayBufferView<ArrayBuffer> | ArrayBuffer;
 
 /**
  * Represents the data type that can be sent as a message.

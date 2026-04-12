@@ -42,6 +42,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^24.12.2",
     "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
     "@types/ws": "^8.18.1",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
@@ -67,13 +68,13 @@
     "react": "^19.2.5"
   },
   "scripts": {
-    "test": "npm run lint && npm run ts:check && npm run unit",
+    "test": "npm run lint && npm run typecheck && npm run unit",
     "lint": "eslint src",
     "unit": "jest --runInBand",
-    "ts:check": "tsc --noEmit",
-    "build:module": "tsc --module es2022 --moduleResolution node --outDir lib/mjs && tsc-alias --outDir lib/mjs && node utils/copy.cjs static/package.mjs.json lib/mjs/package.json",
-    "build:node": "tsc --module commonjs --outDir lib/cjs && node utils/copy.cjs static/package.cjs.json lib/cjs/package.json",
-    "generate:types": "tsc --removeComments false --declaration --emitDeclarationOnly --outDir lib",
+    "typecheck": "tsc --noEmit",
+    "build:module": "tsc --module es2022 --moduleResolution bundler --project tsconfig.build.json --outDir lib/mjs && tsc-alias --outDir lib/mjs && node utils/copy.cjs static/package.mjs.json lib/mjs/package.json",
+    "build:node": "tsc --module commonjs --project tsconfig.build.json --outDir lib/cjs && node utils/copy.cjs static/package.cjs.json lib/cjs/package.json",
+    "generate:types": "tsc --module es2022 --moduleResolution bundler --project tsconfig.build.json --removeComments false --declaration --emitDeclarationOnly --outDir lib",
     "build": "npm run clean && npm run build:module && npm run build:node && npm run generate:types",
     "clean": "node utils/clean.cjs lib"
   }

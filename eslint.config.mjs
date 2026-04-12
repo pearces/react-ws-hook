@@ -17,7 +17,7 @@ export default tseslint.config(
     languageOptions: {
       parserOptions: {
         projectService: {
-          allowDefaultProject: ['src/__tests__/*.ts', '*.{cjs,mjs}']
+          allowDefaultProject: ['*.{cjs,mjs}']
         },
         tsconfigRootDir: import.meta.dirname
       }
@@ -65,9 +65,6 @@ export default tseslint.config(
       'import/resolver': {
         node: {
           extensions: ['.ts', '.tsx', '.js', '.jsx']
-        },
-        webpack: {
-          config: 'webpack.config.js'
         }
       },
       react: {
