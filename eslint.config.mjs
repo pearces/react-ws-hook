@@ -1,7 +1,6 @@
 import eslint from '@eslint/js';
 import { defineConfig, globalIgnores } from 'eslint/config';
 import tseslint from 'typescript-eslint';
-import importPlugin from 'eslint-plugin-import';
 import reactPlugin from 'eslint-plugin-react';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
 import prettierRecommended from 'eslint-plugin-prettier/recommended';
@@ -23,7 +22,6 @@ export default tseslint.config(
     }
   },
   tseslint.configs.stylisticTypeChecked,
-  importPlugin.flatConfigs.recommended,
   reactPlugin.configs.flat.recommended,
   {
     files: ['**/*.{ts,tsx,js,jsx}'],
@@ -45,16 +43,6 @@ export default tseslint.config(
       'react/jsx-filename-extension': [1, { extensions: ['.ts', '.tsx', '.js', '.jsx'] }],
       'react/jsx-props-no-spreading': [1, { custom: 'ignore' }],
       'prettier/prettier': 'error',
-      'import/extensions': [
-        'error',
-        'ignorePackages',
-        {
-          ts: 'never',
-          tsx: 'never',
-          js: 'never',
-          jsx: 'never'
-        }
-      ],
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': 'error',
       ...reactHooksPlugin.configs['recommended-latest'].rules,
