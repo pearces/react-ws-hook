@@ -4,7 +4,6 @@ import tseslint from 'typescript-eslint';
 import importPlugin from 'eslint-plugin-import';
 import reactPlugin from 'eslint-plugin-react';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
-import jestplugin from 'eslint-plugin-jest';
 import prettierRecommended from 'eslint-plugin-prettier/recommended';
 import configPrettier from 'eslint-config-prettier/flat';
 import globals from 'globals';
@@ -32,14 +31,13 @@ export default tseslint.config(
       globals: {
         ...globals.browser,
         ...globals.node,
-        ...jestplugin.environments.globals.globals,
+        ...globals.jest,
         globalThis: true,
         NodeJS: true
       }
     },
     plugins: {
       react: reactPlugin,
-      jest: jestplugin,
       'react-hooks': reactHooksPlugin
     },
     rules: {
