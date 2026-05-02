@@ -15,7 +15,7 @@ const { CLOSED, CONNECTING } = READY_STATES;
  * @param ws - The WebSocket instance.
  * @returns The ready state value.
  */
-export const getReadyState = (ws?: WebSocket | null): ReadyStateValue =>
+export const getReadyState = (ws?: WebSocket | null) =>
   (ws?.readyState ?? CONNECTING) as ReadyStateValue;
 
 /**
