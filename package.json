@@ -59,7 +59,7 @@
     "tsc-alias": "^1.8.17",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.59.3",
-    "ws": "^8.20.0"
+    "ws": "^8.20.1"
   },
   "peerDependencies": {
     "react": "^19.2.5"
