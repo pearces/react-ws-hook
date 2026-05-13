@@ -57,7 +57,7 @@
     "react-dom": "^19.2.6",
     "ts-jest": "^29.4.9",
     "tsc-alias": "^1.8.17",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.3",
     "typescript-eslint": "^8.59.3",
     "ws": "^8.20.1"
   },
