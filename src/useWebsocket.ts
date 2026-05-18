@@ -24,7 +24,7 @@ const { CONNECTING: CONNECT, SENDING, DISCONNECTING } = ACTIONS;
  * @param options - Additional options for configuring the WebSocket connection.
  * @returns An object containing the WebSocket connection state, received messages a method for sending messages.
  */
-const useWebsocket = (url: string | URL, options: WebSocketOptions): WebSocketResult => {
+const useWebsocket = (url: string | URL, options?: WebSocketOptions): WebSocketResult => {
   const [received, setReceived] = useState<MessageData | null>(null);
   const [readyState, setReadyState] = useState<ReadyStateValue>(CONNECTING);
   const messageQueueRef = useRef<Message[]>([]);
