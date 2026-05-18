@@ -1,3 +1,11 @@
+## [0.3.13](https://github.com/pearces/react-ws-hook/compare/v0.3.12...v0.3.13) (2026-05-18)
+
+
+### Bug Fixes
+
+* **config:** update configs for Typescript 6 ([70c221e](https://github.com/pearces/react-ws-hook/commit/70c221e9ec31a79452295f22152157ecd5d21caa))
+* **hook:** correct ref and hook references to resolvelinter errors ([54ec0f3](https://github.com/pearces/react-ws-hook/commit/54ec0f37022b1169b54bf50edca9fe2a54707cad))
+
 ## [0.3.12](https://github.com/pearces/react-ws-hook/compare/v0.3.11...v0.3.12) (2025-11-19)
 
 
