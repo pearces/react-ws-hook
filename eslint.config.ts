@@ -7,7 +7,7 @@ import prettierRecommended from 'eslint-plugin-prettier/recommended';
 import configPrettier from 'eslint-config-prettier/flat';
 import globals from 'globals';
 
-export default tseslint.config(
+export default defineConfig(
   eslint.configs.recommended,
   configPrettier,
   tseslint.configs.recommendedTypeChecked,
@@ -15,9 +15,8 @@ export default tseslint.config(
     languageOptions: {
       parserOptions: {
         projectService: {
-          allowDefaultProject: ['*.{cjs,mjs}']
-        },
-        tsconfigRootDir: import.meta.dirname
+          allowDefaultProject: ['*.{cjs,mjs}', '*.config.ts']
+        }
       }
     }
   },
@@ -35,8 +34,7 @@ export default tseslint.config(
       }
     },
     plugins: {
-      react: reactPlugin,
-      'react-hooks': reactHooksPlugin
+      react: reactPlugin
     },
     rules: {
       'comma-dangle': ['error', 'never'],
@@ -45,7 +43,6 @@ export default tseslint.config(
       'prettier/prettier': 'error',
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': 'error',
-      ...reactHooksPlugin.configs['recommended-latest'].rules,
       '@typescript-eslint/consistent-type-imports': 'error',
       '@typescript-eslint/consistent-type-exports': 'error'
     },
@@ -70,5 +67,6 @@ export default tseslint.config(
       '@typescript-eslint/no-require-imports': 'off',
       'no-console': 'off'
     }
-  }
+  },
+  reactHooksPlugin.configs.flat['recommended-latest']
 );

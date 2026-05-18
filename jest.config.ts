@@ -1,7 +1,7 @@
-/** @type {import('ts-jest').JestConfigWithTsJest} */
-const { WebSocketServer } = require('ws'); // eslint-disable-line import/no-extraneous-dependencies, @typescript-eslint/no-var-requires
+import type { Config } from 'jest';
+import { WebSocketServer } from 'ws';
 
-module.exports = {
+const config: Config = {
   rootDir: './src',
   testMatch: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
   testPathIgnorePatterns: ['/node_modules/'],
@@ -17,3 +17,5 @@ module.exports = {
     '^.+\\.[tj]sx?$': 'ts-jest'
   }
 };
+
+export default config;
