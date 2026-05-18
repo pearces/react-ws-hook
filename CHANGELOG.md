@@ -1,3 +1,10 @@
+## [0.3.14](https://github.com/pearces/react-ws-hook/compare/v0.3.13...v0.3.14) (2026-05-18)
+
+
+### Bug Fixes
+
+* **package:** update exports to include types correctly ([b3a3d66](https://github.com/pearces/react-ws-hook/commit/b3a3d66cb98c9ebf0c3735fe3be56d84b3238052))
+
 ## [0.3.13](https://github.com/pearces/react-ws-hook/compare/v0.3.12...v0.3.13) (2026-05-18)
 
 
