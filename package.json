@@ -11,6 +11,7 @@
   },
   "type": "module",
   "main": "./lib/cjs/index.js",
+  "module": "./lib/mjs/index.js",
   "types": "./lib/index.d.ts",
   "files": [
     "lib",
