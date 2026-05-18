@@ -24,15 +24,15 @@ const { CONNECTING: CONNECT, SENDING, DISCONNECTING } = ACTIONS;
  * @param options - Additional options for configuring the WebSocket connection.
  * @returns An object containing the WebSocket connection state, received messages a method for sending messages.
  */
-export default (url: string | URL, options: WebSocketOptions): WebSocketResult => {
+const useWebsocket = (url: string | URL, options: WebSocketOptions): WebSocketResult => {
   const [received, setReceived] = useState<MessageData | null>(null);
   const [readyState, setReadyState] = useState<ReadyStateValue>(CONNECTING);
-  const messageQueue = useRef<Message[]>([]).current;
-  let lastEvent = useRef<Action | null>(null).current;
-  let isReconnecting = useRef(false).current;
-  let currentReadyState = useRef<ReadyStateValue>(readyState).current;
+  const messageQueueRef = useRef<Message[]>([]);
+  const lastEventRef = useRef<Action | null>(null);
+  const isReconnectingRef = useRef(false);
+  const currentReadyStateRef = useRef<ReadyStateValue>(readyState);
 
-  const combinedOptions = useRef<FinalWebSocketOptions>({ ...DEFAULT_OPTIONS, ...options }).current;
+  const combinedOptions = { ...DEFAULT_OPTIONS, ...options } as FinalWebSocketOptions;
   const {
     reconnectWait,
     reconnectAttempts,
@@ -45,8 +45,48 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
     onError: errorHandler,
     logger
   } = combinedOptions;
-  let reconnectTimer = useRef<NodeJS.Timeout | null>(null).current;
+  const reconnectTimerRef = useRef<NodeJS.Timeout | null>(null);
   const reconnects = useRef<number>(reconnectAttempts);
+
+  const ws = useRef<WebSocket | null>(null);
+  const readyStateSubsRef = useRef<Set<() => void>>(new Set<() => void>());
+
+  const handlersRef = useRef<Handlers>({} as Handlers);
+
+  const readyStateCallback = useCallback(() => {
+    currentReadyStateRef.current = getReadyState(ws.current);
+    setReadyState(currentReadyStateRef.current);
+  }, []);
+
+  /* eslint-disable react-hooks/exhaustive-deps */
+  useEffect(() => {
+    if (typeof WebSocket === 'undefined') {
+      logger.warn(WS_UNSUPPORTED);
+      return;
+    }
+    if (!ws.current) {
+      lastEventRef.current = CONNECT;
+      connect(ws, url, handlersRef.current, readyStateSubsRef.current, readyStateCallback);
+    }
+
+    return () => {
+      const handlers = handlersRef.current;
+      const readyStateSubs = readyStateSubsRef.current;
+      const wsCurrent = ws.current;
+
+      if (reconnectTimerRef.current !== null) clearTimeout(reconnectTimerRef.current);
+      if (!wsCurrent) return;
+
+      removeAllListeners(wsCurrent, handlers, readyStateSubs, false);
+
+      wsCurrent.onerror = onError;
+      if (readyState === OPEN || readyState === CONNECTING) {
+        lastEventRef.current = DISCONNECTING;
+        wsCurrent?.close();
+      }
+      kill(ws);
+    };
+  }, []);
 
   if (typeof WebSocket === 'undefined') {
     logger.warn(WS_UNSUPPORTED);
@@ -58,24 +98,14 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
     };
   }
 
-  const ws = useRef<WebSocket | null>(null);
-  const readyStateSubs = useRef<Set<() => void>>(new Set<() => void>()).current;
-
-  const handlers = useRef<Handlers>({
-    open: onOpen,
-    close: onClose,
-    error: onError,
-    message: onMessage
-  }).current;
-
   /**
    * Handles the error event for the WebSocket connection.
    * @param error - The error event object.
    */
   function onError(error: Event) {
-    logger.error(`Failed ${lastEvent ?? ''} ${JSON.stringify(error)}`);
+    logger.error(`Failed ${lastEventRef.current ?? ''} ${JSON.stringify(error)}`);
     if (errorHandler) errorHandler(error);
-    lastEvent = null;
+    lastEventRef.current = null;
   }
 
   /**
@@ -96,19 +126,20 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
    * If the ready state is not CLOSED, it clears the reconnect timer.
    */
   function reconnect() {
-    isReconnecting = true;
-    reconnectTimer = setTimeout(() => {
+    isReconnectingRef.current = true;
+    reconnectTimerRef.current = setTimeout(() => {
       if (
-        (currentReadyState === CLOSED || currentReadyState === CONNECTING) &&
+        (currentReadyStateRef.current === CLOSED || currentReadyStateRef.current === CONNECTING) &&
         reconnects.current > 0
       ) {
-        lastEvent = CONNECT;
-        if (currentReadyState === CLOSED) wsReconnect(ws, url, handlers, readyStateSubs);
+        lastEventRef.current = CONNECT;
+        if (currentReadyStateRef.current === CLOSED)
+          wsReconnect(ws, url, handlersRef.current, readyStateSubsRef.current);
         reconnects.current -= 1;
         reconnect();
       } else {
-        clearTimeout(reconnectTimer!);
-        isReconnecting = false;
+        clearTimeout(reconnectTimerRef.current!);
+        isReconnectingRef.current = false;
         if (reconnects.current === 0) logger.warn(RECONNECT_LIMIT_EXCEEDED);
       }
     }, reconnectWait);
@@ -122,7 +153,7 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
     const willReconnect = shouldReconnect && reconnects.current > 0;
     if (reconnects.current === 0) logger.warn(RECONNECT_LIMIT_EXCEEDED);
     if (closeHandler) closeHandler(event);
-    if (willReconnect && !isReconnecting) reconnect();
+    if (willReconnect && !isReconnectingRef.current) reconnect();
   }
 
   /**
@@ -133,11 +164,11 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
     const currentState: ReadyStateValue = getReadyState(ws.current);
 
     if (currentState === OPEN) {
-      lastEvent = SENDING;
+      lastEventRef.current = SENDING;
       ws.current?.send(message);
       if (sendHandler) sendHandler(message);
     } else {
-      if (retrySend) messageQueue.push(message);
+      if (retrySend) messageQueueRef.current.push(message);
       else logger.warn(SEND_ERROR);
 
       if (currentState !== CONNECTING) reconnect();
@@ -150,47 +181,25 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
    */
   function onOpen(event: Event) {
     reconnects.current = reconnectAttempts;
-    isReconnecting = false;
+    isReconnectingRef.current = false;
     if (openHandler) openHandler(event);
-    lastEvent = null;
+    lastEventRef.current = null;
 
-    if (messageQueue.length) {
-      while (messageQueue.length && currentReadyState === OPEN) {
-        const message = messageQueue.shift();
+    if (messageQueueRef.current.length) {
+      while (messageQueueRef.current.length && currentReadyStateRef.current === OPEN) {
+        const message = messageQueueRef.current.shift();
         if (message !== undefined) send(message);
       }
     }
   }
 
-  const readyStateCallback = useCallback(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    currentReadyState = getReadyState(ws.current);
-    setReadyState(() => currentReadyState);
-  }, []);
-
-  useEffect(() => {
-    if (!ws.current) {
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      lastEvent = CONNECT;
-      connect(ws, url, handlers, readyStateSubs, readyStateCallback);
-    }
-
-    return () => {
-      if (reconnectTimer !== null) clearTimeout(reconnectTimer);
-      if (!ws.current) return;
-
-      removeAllListeners(ws.current, handlers, readyStateSubs, false);
-
-      ws.current.onerror = onError;
-      if (readyState === OPEN || readyState === CONNECTING) {
-        lastEvent = DISCONNECTING;
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        ws.current?.close();
-      }
-      kill(ws);
-    };
-  }, []);
-
+  // populate handlersRef after function declarations so they reference the latest functions
+  handlersRef.current = {
+    open: onOpen,
+    close: onClose,
+    error: onError,
+    message: onMessage
+  };
   return {
     send,
     received,
@@ -198,3 +207,5 @@ export default (url: string | URL, options: WebSocketOptions): WebSocketResult =
     url: ws.current?.url ?? url
   };
 };
+
+export default useWebsocket;
