@@ -1,6 +1,6 @@
 import type { RefObject } from 'react';
 import { READY_STATES } from './constants';
-import type { Handlers, ReadyStateValue } from './types';
+import type { Handlers } from './types';
 import {
   addListeners,
   callbackToHandlers,
@@ -15,8 +15,7 @@ const { CLOSED, CONNECTING } = READY_STATES;
  * @param ws - The WebSocket instance.
  * @returns The ready state value.
  */
-export const getReadyState = (ws?: WebSocket | null) =>
-  (ws?.readyState ?? CONNECTING) as ReadyStateValue;
+export const getReadyState = (ws?: WebSocket | null) => ws?.readyState ?? CONNECTING;
 
 /**
  * Synchronizes the ready state with the ready state subscription callbacks.
