@@ -1,3 +1,11 @@
+## [0.3.15](https://github.com/pearces/react-ws-hook/compare/v0.3.14...v0.3.15) (2026-05-18)
+
+
+### Bug Fixes
+
+* **hook:** make options optional for simplicity ([2a1b138](https://github.com/pearces/react-ws-hook/commit/2a1b138f5df3a168badfb3253d48d691a1e999c0))
+* **package:** add module field for esm export resolution ([59837dd](https://github.com/pearces/react-ws-hook/commit/59837dd5388582d6e0b46250a2e48b7dd6169318))
+
 ## [0.3.14](https://github.com/pearces/react-ws-hook/compare/v0.3.13...v0.3.14) (2026-05-18)
 
 
