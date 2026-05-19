@@ -63,7 +63,7 @@
     "ts-jest": "^29.4.9",
     "tsc-alias": "^1.8.17",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.59.3",
+    "typescript-eslint": "^8.59.4",
     "ws": "^8.20.1"
   },
   "peerDependencies": {
