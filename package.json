@@ -59,7 +59,7 @@
     "jiti": "^2.7.0",
     "prettier": "^3.9.10",
     "react": "^19.3.0",
-    "react-dom": "^19.3.0",
+    "react-dom": "^19.3.1",
     "ts-jest": "^29.4.15",
     "tsc-alias": "^1.9.8",
     "typescript": "^6.0.3",
