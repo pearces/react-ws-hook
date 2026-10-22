@@ -58,7 +58,7 @@
     "jest-environment-jsdom": "^30.5.2",
     "jiti": "^2.7.0",
     "prettier": "^3.9.10",
-    "react": "^19.3.0",
+    "react": "^19.3.1",
     "react-dom": "^19.3.0",
     "ts-jest": "^29.4.15",
     "tsc-alias": "^1.9.8",
@@ -67,7 +67,7 @@
     "ws": "^8.22.0"
   },
   "peerDependencies": {
-    "react": "^19.3.0"
+    "react": "^19.3.1"
   },
   "scripts": {
     "test": "npm run lint && npm run typecheck && npm run unit",
